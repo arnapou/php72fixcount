@@ -87,5 +87,4 @@ class ShellArguments
         echo "usage: php php72-fix-count.php [--quiet] directory [...]\n\n";
         exit;
     }
-
 }

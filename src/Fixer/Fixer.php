@@ -111,7 +111,6 @@ $phpUnfixed
 $phpConflicts
 
 ", LOCK_EX);
-
     }
 
     /**
@@ -146,6 +145,4 @@ $phpConflicts
         }
         return $php;
     }
-
-
 }

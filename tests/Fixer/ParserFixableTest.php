@@ -23,5 +23,4 @@ class ParserFixableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['FixCount\\Test\\Namespace1' => 2, 'FixCount\\Test\\Namespace2' => 2], $parser->getFixable(), 'fixable');
         $this->assertSame(['FixCount\\Test\\Namespace1' => 3, 'FixCount\\Test\\Namespace2' => 3], $parser->getUnfixable(), 'unfixable');
     }
-
 }

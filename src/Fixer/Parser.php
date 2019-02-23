@@ -88,7 +88,6 @@ class Parser
                     if (!$class && strtolower($string) === 'count') {
                         $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
                     }
-
                 } elseif (self::T_FUNCTION_CALL === $type) {
                     if (strtolower($string) === 'count') {
                         $this->foundFixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
@@ -221,5 +220,4 @@ class Parser
     {
         return $this->foundUnfixable;
     }
-
 }

@@ -23,5 +23,4 @@ class ParserUnfixableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $parser->getFixable(), 'fixable');
         $this->assertSame([], $parser->getUnfixable(), 'unfixable');
     }
-
 }

@@ -32,5 +32,4 @@ class ParserConflictTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['FixCount\\Test\\CountRedefinedInNS' => 2], $parser->getFixable(), 'fixable');
         $this->assertSame(['FixCount\\Test\\CountRedefinedInNS' => 3], $parser->getUnfixable(), 'unfixable');
     }
-
 }

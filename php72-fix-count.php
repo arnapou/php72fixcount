@@ -7,7 +7,7 @@ use Arnapou\Php72FixCount\Fixer\ShellArguments;
  * Autoload
  */
 spl_autoload_register(function ($class) {
-    $baseNS = "Arnapou\\Php72FixCount\\";
+    $baseNS = 'Arnapou\\Php72FixCount\\';
     if (0 === strpos($class, $baseNS)) {
         $path     = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
         $filename = str_replace('\\', DIRECTORY_SEPARATOR, substr($class, \strlen($baseNS))) . '.php';
@@ -20,17 +20,19 @@ spl_autoload_register(function ($class) {
 /*
  * Execute fixer
  */
-$arguments = new ShellArguments(isset($argv) ? array_slice($argv, 1) : []);
+$arguments = new ShellArguments(isset($argv) ? \array_slice($argv, 1) : []);
 
 if (PHP_VERSION_ID >= 70200) {
-
-    if (!defined('PHP72_FIXCOUNT_TARGET')) {
-        define('PHP72_FIXCOUNT_TARGET', 'count');
+    if (!\defined('PHP72_FIXCOUNT_TARGET')) {
+        \define('PHP72_FIXCOUNT_TARGET', 'count');
     }
 
     $fixer = new Fixer(PHP72_FIXCOUNT_TARGET);
-    $fixer->execute($arguments->getPaths(), __DIR__ . '/generated.php72fix.' . PHP72_FIXCOUNT_TARGET . '.php', $arguments->getOptions());
-
+    $fixer->execute(
+        $arguments->getPaths(),
+        __DIR__ . '/generated.php72fix.' . PHP72_FIXCOUNT_TARGET . '.php',
+        $arguments->getOptions()
+    );
 } elseif (!$arguments->isQuiet()) {
     echo "No need to run Fixer if php version is < 7.2\n";
 }

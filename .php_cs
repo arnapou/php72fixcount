@@ -7,6 +7,10 @@ $finder = PhpCsFixer\Finder::create()
     ->in([
         __DIR__ . '/src',
         __DIR__ . '/tests',
+    ])
+    ->append([
+        __DIR__ . '/php72-fix-count.php',
+        __DIR__ . '/php72-fix-sizeof.php',
     ]);
 
 return PhpCsFixer\Config::create()

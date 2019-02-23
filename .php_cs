@@ -9,6 +9,7 @@ $finder = PhpCsFixer\Finder::create()
         __DIR__ . '/tests',
     ])
     ->append([
+        __DIR__ . '/bootstrap.php',
         __DIR__ . '/php72-fix-count.php',
         __DIR__ . '/php72-fix-sizeof.php',
     ]);

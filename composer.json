@@ -30,7 +30,8 @@
         }
     },
     "bin": [
-        "php72-fix-count.php"
+        "php72-fix-count.php",
+        "php72-fix-sizeof.php"
     ],
     "minimum-stability": "dev"
 }

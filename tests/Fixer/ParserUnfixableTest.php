@@ -23,4 +23,13 @@ class ParserUnfixableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $parser->getFixable(), 'fixable');
         $this->assertSame([], $parser->getUnfixable(), 'unfixable');
     }
+
+    public function testStaticCountFunction()
+    {
+        $parser = new Parser(__DIR__ . '/../data/unfixable/StaticCountFunction.php');
+
+        $this->assertSame([], $parser->getConflicts(), 'conflict');
+        $this->assertSame([], $parser->getFixable(), 'fixable');
+        $this->assertSame([], $parser->getUnfixable(), 'unfixable');
+    }
 }

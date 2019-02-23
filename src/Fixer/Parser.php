@@ -171,7 +171,7 @@ class Parser
         $string = '';
         while ($this->index < $this->count) {
             $token = $this->token();
-            if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
+            if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_DOUBLE_COLON) {
                 $string .= $token[1];
                 $this->index++;
             } elseif ($token[0] === T_WHITESPACE) {

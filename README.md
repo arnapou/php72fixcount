@@ -49,7 +49,7 @@ In your `composer.json` :
     },
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/arnapou/php72fixcount/fixer.php --quiet src vendor"
+            "@php vendor/bin/php72-fix-count.php --quiet src vendor"
         ]
     }
 
@@ -61,7 +61,7 @@ You must add all directories in the same command line, example:
 
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/arnapou/php72fixcount/fixer.php --quiet src vendor another/path"
+            "@php vendor/bin/php72-fix-count.php --quiet src vendor another/path"
         ]
     }
 

@@ -80,7 +80,7 @@ class Parser
                 $namespace = $string;
             } elseif ($namespace) {
                 if (self::T_USE_FUNCTION === $type) {
-                    if (strtolower($string) === $this->target || substr(strtolower($string), -6) === "\\" . $this->target) {
+                    if (strtolower($string) === $this->target || substr(strtolower($string), -6) === '\\' . $this->target) {
                         $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
                     }
                 } elseif (self::T_CLASS === $type) {
@@ -96,7 +96,7 @@ class Parser
                 } elseif (self::T_FUNCTION_CALL === $type) {
                     if (strtolower($string) === $this->target) {
                         $this->foundFixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
-                    } elseif (strtolower($string) === "\\" . $this->target) {
+                    } elseif (strtolower($string) === '\\' . $this->target) {
                         $this->foundUnfixable[$namespace] = isset($this->foundUnfixable[$namespace]) ? $this->foundUnfixable[$namespace] + 1 : 1;
                     }
                 }

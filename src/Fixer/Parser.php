@@ -39,14 +39,19 @@ class Parser
     /**
      * @var string
      */
-    private $namespace;
+    private $target;
 
     /**
      * Parser constructor.
-     * @param $filename
+     * @param string $filename
+     * @param string $target 'count' or 'sizeof'
      */
-    public function __construct($filename)
+    public function __construct($filename, $target = 'count')
     {
+        if (!\in_array($target, ['count', 'sizeof'])) {
+            throw new \InvalidArgumentException("Target argument is not valid, it should be 'count' or 'sizeof'.");
+        }
+        $this->target = $target;
         $this->tokens = token_get_all(file_get_contents($filename));
         $this->count  = \count($this->tokens);
         $this->parse();
@@ -75,7 +80,7 @@ class Parser
                 $namespace = $string;
             } elseif ($namespace) {
                 if (self::T_USE_FUNCTION === $type) {
-                    if (strtolower($string) === 'count' || substr(strtolower($string), -6) === '\count') {
+                    if (strtolower($string) === $this->target || substr(strtolower($string), -6) === "\\" . $this->target) {
                         $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
                     }
                 } elseif (self::T_CLASS === $type) {
@@ -85,13 +90,13 @@ class Parser
                     $function      = $string;
                     $functionBrace = $braces;
 
-                    if (!$class && strtolower($string) === 'count') {
+                    if (!$class && strtolower($string) === $this->target) {
                         $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
                     }
                 } elseif (self::T_FUNCTION_CALL === $type) {
-                    if (strtolower($string) === 'count') {
+                    if (strtolower($string) === $this->target) {
                         $this->foundFixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
-                    } elseif (strtolower($string) === '\count') {
+                    } elseif (strtolower($string) === "\\" . $this->target) {
                         $this->foundUnfixable[$namespace] = isset($this->foundUnfixable[$namespace]) ? $this->foundUnfixable[$namespace] + 1 : 1;
                     }
                 }

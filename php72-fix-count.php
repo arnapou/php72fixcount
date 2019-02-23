@@ -23,8 +23,14 @@ spl_autoload_register(function ($class) {
 $arguments = new ShellArguments(isset($argv) ? array_slice($argv, 1) : []);
 
 if (PHP_VERSION_ID >= 70200) {
-    $fixer = new Fixer();
-    $fixer->execute($arguments->getPaths(), __DIR__ . '/generated.php72fixcount.php', $arguments->getOptions());
+
+    if (!defined('PHP72_FIXCOUNT_TARGET')) {
+        define('PHP72_FIXCOUNT_TARGET', 'count');
+    }
+
+    $fixer = new Fixer(PHP72_FIXCOUNT_TARGET);
+    $fixer->execute($arguments->getPaths(), __DIR__ . '/generated.php72fix.' . PHP72_FIXCOUNT_TARGET . '.php', $arguments->getOptions());
+
 } elseif (!$arguments->isQuiet()) {
     echo "No need to run Fixer if php version is < 7.2\n";
 }

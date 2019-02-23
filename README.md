@@ -49,7 +49,8 @@ In your `composer.json` :
     },
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/bin/php72-fix-count.php --quiet src vendor"
+            "@php vendor/bin/php72-fix-count.php --quiet src vendor",
+            "@php vendor/bin/php72-fix-sizeof.php --quiet src vendor"
         ]
     }
 
@@ -57,13 +58,17 @@ Usage of `fixer.php` :
 
     php php72-fix-count.php [--quiet] directory [...]
 
-You must add all directories in the same command line, example:
+You must add all directories in the same command line because each script execution will override the generated fix, **DON'T** do that :
 
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/bin/php72-fix-count.php --quiet src vendor another/path"
+            "@php vendor/bin/php72-fix-count.php --quiet src ",             |  DOES
+            "@php vendor/bin/php72-fix-count.php --quiet vendor",           |  NOT 
+            "@php vendor/bin/php72-fix-sizeof.php --quiet src",             |  WORK
+            "@php vendor/bin/php72-fix-sizeof.php --quiet vendor",          |  !!!
         ]
     }
+
 
 
 ### Annexe from php.net

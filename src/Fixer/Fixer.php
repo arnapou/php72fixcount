@@ -18,6 +18,22 @@ class Fixer
      * @var array
      */
     private $conflicts = [];
+    /**
+     * @var string
+     */
+    private $target;
+
+    /**
+     * Fixer constructor.
+     * @param string $target 'count' or 'sizeof'
+     */
+    public function __construct($target = 'count')
+    {
+        if (!\in_array($target, ['count', 'sizeof'])) {
+            throw new \InvalidArgumentException("Target argument is not valid, it should be 'count' or 'sizeof'.");
+        }
+        $this->target = $target;
+    }
 
     /**
      * @param array  $paths
@@ -53,7 +69,7 @@ class Fixer
      */
     protected function analyze($filename, array $options)
     {
-        $parser = new Parser($filename);
+        $parser = new Parser($filename, $this->target);
 
         foreach ($parser->getConflicts() as $ns => $count) {
             if (!$options['quiet']) {
@@ -84,6 +100,7 @@ class Fixer
         ksort($this->unfixable);
         ksort($this->conflicts);
 
+        $target       = $this->target;
         $date         = date('l d F Y H:i:s');
         $phpFixed     = self::getPhpFixedNamespaces(array_keys($this->fixable)) ?: '// nothing is fixable';
         $phpUnfixed   = self::getPhpUnfixedNamespaces(array_keys($this->unfixable)) ?: '// nothing to list';
@@ -98,14 +115,14 @@ class Fixer
 $phpFixed
 
 /* 
- * Bellow are not fixed because \\count is called
+ * Bellow are not fixed because \\$target is called
  */
 
 $phpUnfixed
 
 /* 
  * Bellow are not fixed because there is a conflict 
- * with an existing namespaced count function
+ * with an existing namespaced $target function
  */
 
 $phpConflicts
@@ -125,10 +142,11 @@ $phpConflicts
             $n   = \strlen($namespace);
             $max = $n > $max ? $n : $max;
         }
-        $class = Php72::class;
+        $class  = Php72::class;
+        $target = $this->target;
         foreach ($namespaces as $namespace) {
             $namespace = str_pad($namespace, $max + 1, ' ', STR_PAD_RIGHT);
-            $php       .= "namespace $namespace { function count(\$item, \$mode = \\COUNT_NORMAL) { return \\$class::count(\$item, \$mode); } }\n";
+            $php       .= "namespace $namespace { function $target(\$item, \$mode = \\COUNT_NORMAL) { return \\$class::count(\$item, \$mode); } }\n";
         }
         return $php;
     }

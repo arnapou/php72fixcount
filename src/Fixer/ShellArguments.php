@@ -84,7 +84,8 @@ class ShellArguments
         if ($error) {
             echo "error: $error\n\n";
         }
-        echo "usage: php php72-fix-count.php [--quiet] directory [...]\n\n";
+        $scriptName = isset($_SERVER['PHP_SELF']) ? basename($_SERVER['PHP_SELF']) : 'php72-fix-count.php';
+        echo "usage: php $scriptName [--quiet] directory [...]\n\n";
         exit;
     }
 }

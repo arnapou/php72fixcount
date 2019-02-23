@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
+         colors="true"
+         bootstrap="vendor/autoload.php"
+         beStrictAboutCoversAnnotation="false"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         verbose="true"
+>
+    <php>
+        <ini name="error_reporting" value="-1"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="Arnapou Polyfill Test Suite">
+            <directory>./tests/</directory>
+            <exclude>./tests/Php71/PhpCountTest.php</exclude>
+        </testsuite>
+        <testsuite name="Test PHP native count before version 7.2">
+            <file phpVersion="7.2.0" phpVersionOperator="&lt;">./tests/Php71/PhpCountTest.php</file>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>./src/</directory>
+        </whitelist>
+    </filter>
+
+</phpunit>

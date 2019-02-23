@@ -1,0 +1,36 @@
+{
+    "name": "arnapou/php72fixcount",
+    "description": "Arnapou PHP 7.2 Fix count",
+    "authors": [
+        {
+            "name": "Arnaud Buathier",
+            "email": "arnaud@arnapou.net",
+            "homepage": "http://arnapou.net"
+        }
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    },
+    "require": {
+        "php": ">=5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Arnapou\\Php72FixCount\\": "src/"
+        },
+        "files": [
+            "bootstrap.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Arnapou\\Php72FixCount\\Tests\\": "tests/"
+        }
+    },
+    "bin": [
+        "php72-fix-count.php"
+    ],
+    "minimum-stability": "dev"
+}

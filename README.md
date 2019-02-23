@@ -54,9 +54,10 @@ In your `composer.json` :
         ]
     }
 
-Usage of `fixer.php` :
+Usage of `php72-fix-count.php` and `php72-fix-sizeof.php` :
 
     php php72-fix-count.php [--quiet] directory [...]
+    php php72-fix-sizeof.php [--quiet] directory [...]
 
 You must add all directories in the same command line because each script execution will override the generated fix, **DON'T** do that :
 

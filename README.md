@@ -1,6 +1,9 @@
 Php 7.2 fix count
 ================
 
+[![Build Status](https://travis-ci.org/arnapou/php72fixcount.svg?branch=master)](https://travis-ci.org/arnapou/php72fixcount)
+
+
 When [migrating to PHP 7.2](http://php.net/manual/en/migration72.php) there is a big incompatible change with the `count()` function.
 
 The new `count()` function works only on countable variables (`array` or object which implements `Countable`).

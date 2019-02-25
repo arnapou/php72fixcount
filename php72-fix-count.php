@@ -23,14 +23,12 @@ spl_autoload_register(function ($class) {
 $arguments = new ShellArguments(isset($argv) ? \array_slice($argv, 1) : []);
 
 if (PHP_VERSION_ID >= 70200) {
-    if (!\defined('PHP72_FIXCOUNT_TARGET')) {
-        \define('PHP72_FIXCOUNT_TARGET', 'count');
-    }
+    $PHP72FIXCOUNT_TARGET = $PHP72FIXCOUNT_TARGET ?? 'count';
 
-    $fixer = new Fixer(PHP72_FIXCOUNT_TARGET);
+    $fixer = new Fixer($PHP72FIXCOUNT_TARGET);
     $fixer->execute(
         $arguments->getPaths(),
-        __DIR__ . '/generated.php72fix.' . PHP72_FIXCOUNT_TARGET . '.php',
+        __DIR__ . "/generated.php72fix.$PHP72FIXCOUNT_TARGET.php",
         $arguments->getOptions()
     );
 } elseif (!$arguments->isQuiet()) {

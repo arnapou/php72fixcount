@@ -2,7 +2,7 @@
 
 namespace FixCount\Test\NoCount;
 
-class NoCount
+class NoCount extends AnyClass
 {
     public function test()
     {

@@ -59,13 +59,14 @@ class Parser
 
     private function parse()
     {
-        $braces        = 0;
-        $namespace     = '';
-        $class         = '';
-        $classBrace    = 0;
-        $function      = '';
-        $functionBrace = 0;
-        foreach ($this->reducedTokens() as $type => $string) {
+        $braces            = 0;
+        $namespace         = '';
+        $class             = '';
+        $classBrace        = 0;
+        $function          = '';
+        $functionBrace     = 0;
+        $useFunctionNative = false;
+        foreach ($this->reducedTokens() as $type => $value) {
             if (self::T_BRACE_OPEN === $type) {
                 $braces++;
             } elseif (self::T_BRACE_CLOSE === $type) {
@@ -77,27 +78,37 @@ class Parser
                     $function = '';
                 }
             } elseif (self::T_NAMESPACE === $type) {
-                $namespace = $string;
+                $namespace         = $value;
+                $useFunctionNative = false;
             } elseif ($namespace) {
                 if (self::T_USE_FUNCTION === $type) {
-                    if (strtolower($string) === $this->target || substr(strtolower($string), -6) === '\\' . $this->target) {
-                        $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
+                    if (strtolower($value[1]) === $this->target) {
+                        if (strtolower($value[0]) === $this->target) {
+                            $useFunctionNative = true;
+                            $this->addUnfixable($namespace);
+                        } else {
+                            $this->addConflict($namespace);
+                        }
                     }
                 } elseif (self::T_CLASS === $type) {
-                    $class      = $string;
+                    $class      = $value;
                     $classBrace = $braces;
                 } elseif (self::T_FUNCTION === $type) {
-                    $function      = $string;
+                    $function      = $value;
                     $functionBrace = $braces;
 
-                    if (!$class && strtolower($string) === $this->target) {
-                        $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
+                    if (!$class && strtolower($value) === $this->target) {
+                        $this->addConflict($namespace);
                     }
                 } elseif (self::T_FUNCTION_CALL === $type) {
-                    if (strtolower($string) === $this->target) {
-                        $this->foundFixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
-                    } elseif (strtolower($string) === '\\' . $this->target) {
-                        $this->foundUnfixable[$namespace] = isset($this->foundUnfixable[$namespace]) ? $this->foundUnfixable[$namespace] + 1 : 1;
+                    if (strtolower($value) === $this->target) {
+                        if ($useFunctionNative) {
+                            $this->addUnfixable($namespace);
+                        } else {
+                            $this->addFixable($namespace);
+                        }
+                    } elseif (strtolower($value) === '\\' . $this->target) {
+                        $this->addUnfixable($namespace);
                     }
                 }
             }
@@ -126,9 +137,10 @@ class Parser
                 if ($this->token()[0] === T_FUNCTION) {
                     $string = $this->getFollowingString(1);
                     if ($this->token()[0] === T_AS) {
-                        $string = $this->getFollowingString(1);
+                        yield self::T_USE_FUNCTION => [ltrim($string, '\\'), $this->getFollowingString(1)];
+                    } else {
+                        yield self::T_USE_FUNCTION => [ltrim($string, '\\'), ltrim(substr($string, strrpos($string, '\\') ?: 0), '\\')];
                     }
-                    yield self::T_USE_FUNCTION => $string;
                 }
             } elseif ($token[0] === T_FUNCTION) {
                 $string = $this->getFollowingString(1);
@@ -203,6 +215,30 @@ class Parser
         while ($this->token()[0] === T_WHITESPACE) {
             $this->index++;
         }
+    }
+
+    /**
+     * @param string $namespace
+     */
+    private function addConflict($namespace)
+    {
+        $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
+    }
+
+    /**
+     * @param string $namespace
+     */
+    private function addFixable($namespace)
+    {
+        $this->foundFixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
+    }
+
+    /**
+     * @param string $namespace
+     */
+    private function addUnfixable($namespace)
+    {
+        $this->foundUnfixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
     }
 
     /**

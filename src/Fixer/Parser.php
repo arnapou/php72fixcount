@@ -142,6 +142,8 @@ class Parser
                         yield self::T_USE_FUNCTION => [ltrim($string, '\\'), ltrim(substr($string, strrpos($string, '\\') ?: 0), '\\')];
                     }
                 }
+            } elseif ($token[0] === T_OBJECT_OPERATOR) {
+                $this->getFollowingString(1, -1); // skip method call
             } elseif ($token[0] === T_FUNCTION) {
                 $string = $this->getFollowingString(1);
                 if ($this->token() === [null, '(', null]) {

@@ -6,7 +6,7 @@ class NoCount
 {
     public function test()
     {
-        echo "Hello World\n";
+        echo $this->count() . "\n";
     }
 
     public function count()

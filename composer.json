@@ -1,6 +1,7 @@
 {
     "name": "arnapou/php72fixcount",
     "description": "Arnapou PHP 7.2 Fix count",
+    "license": "MIT",
     "authors": [
         {
             "name": "Arnaud Buathier",

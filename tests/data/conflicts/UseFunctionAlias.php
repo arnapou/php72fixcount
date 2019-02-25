@@ -2,7 +2,7 @@
 
 namespace FixCount\Test\UseFunctionAlias;
 
-use function Another\HackedCound as count;
+use function Another\HackedCount as count;
 
 class UseFunctionAlias
 {

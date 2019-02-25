@@ -3,8 +3,9 @@
 namespace Arnapou\Php72FixCount\Tests\Php71;
 
 use Arnapou\Php72FixCount\Tests\CountableObject;
+use Arnapou\Php72FixCount\Tests\TestCase;
 
-class PhpCountTest extends \PHPUnit\Framework\TestCase
+class PhpCountTest extends TestCase
 {
     public function testCountString()
     {

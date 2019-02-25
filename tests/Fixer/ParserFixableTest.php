@@ -3,8 +3,9 @@
 namespace Arnapou\Php72FixCount\Tests\Fixer;
 
 use Arnapou\Php72FixCount\Fixer\Parser;
+use Arnapou\Php72FixCount\Tests\TestCase;
 
-class ParserFixableTest extends \PHPUnit\Framework\TestCase
+class ParserFixableTest extends TestCase
 {
     public function testNormalClass()
     {
@@ -20,8 +21,8 @@ class ParserFixableTest extends \PHPUnit\Framework\TestCase
         $parser = new Parser(__DIR__ . '/../data/fixable/NormalTrait.php');
 
         $this->assertSame([], $parser->getConflicts(), 'conflict');
-        $this->assertSame(['FixCount\\Test\\NormalTrait' => 2], $parser->getFixable(), 'fixable');
-        $this->assertSame(['FixCount\\Test\\NormalTrait' => 3], $parser->getUnfixable(), 'unfixable');
+        $this->assertSame(['FixCount\\Test\\NormalTrait' => 1], $parser->getFixable(), 'fixable');
+        $this->assertSame([], $parser->getUnfixable(), 'unfixable');
     }
 
     public function testMultipleNamespace()

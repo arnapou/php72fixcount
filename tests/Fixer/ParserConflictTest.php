@@ -3,8 +3,9 @@
 namespace Arnapou\Php72FixCount\Tests\Fixer;
 
 use Arnapou\Php72FixCount\Fixer\Parser;
+use Arnapou\Php72FixCount\Tests\TestCase;
 
-class ParserConflictTest extends \PHPUnit\Framework\TestCase
+class ParserConflictTest extends TestCase
 {
     public function testUseFunction()
     {

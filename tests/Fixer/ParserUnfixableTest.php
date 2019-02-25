@@ -3,12 +3,22 @@
 namespace Arnapou\Php72FixCount\Tests\Fixer;
 
 use Arnapou\Php72FixCount\Fixer\Parser;
+use Arnapou\Php72FixCount\Tests\TestCase;
 
-class ParserUnfixableTest extends \PHPUnit\Framework\TestCase
+class ParserUnfixableTest extends TestCase
 {
     public function testNoCount()
     {
         $parser = new Parser(__DIR__ . '/../data/unfixable/NoCount.php');
+
+        $this->assertSame([], $parser->getConflicts(), 'conflict');
+        $this->assertSame([], $parser->getFixable(), 'fixable');
+        $this->assertSame([], $parser->getUnfixable(), 'unfixable');
+    }
+
+    public function testInterface()
+    {
+        $parser = new Parser(__DIR__ . '/../data/unfixable/NoCountInInterface.php');
 
         $this->assertSame([], $parser->getConflicts(), 'conflict');
         $this->assertSame([], $parser->getFixable(), 'fixable');

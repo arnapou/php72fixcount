@@ -157,14 +157,16 @@ class Parser
                 }
             } elseif ($token[0] === T_CLASS) {
                 yield self::T_CLASS => $this->getFollowingString(1, -1);
-                $this->forwardTo([null, '{', null], 1, -1);
+                $this->forwardToNextOpenBrace(1);
+            } elseif ($token[0] === T_INTERFACE) {
+                $this->forwardToNextOpenBrace();
+                $this->skipBraceBlock();
             } elseif ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
                 $string = $this->getFollowingString();
                 if ($this->token() === [null, '(', null]) {
                     yield self::T_FUNCTION_CALL => $string;
                 }
             }
-
             $this->index++;
         }
     }
@@ -227,17 +229,36 @@ class Parser
     }
 
     /**
-     * @param array $token
-     * @param int   $jumpBefore
-     * @param int   $jumpAfter
+     * @param int $jumpBefore
      */
-    private function forwardTo($token, $jumpBefore = 0, $jumpAfter = 0)
+    private function forwardToNextOpenBrace($jumpBefore = 0)
     {
         $this->index += $jumpBefore;
-        while ($this->token() !== $token) {
+        while ($this->token() !== [null, '{', null]) {
             $this->index++;
         }
-        $this->index += $jumpAfter;
+    }
+
+    /**
+     * if the current token is not an opened brace, the function won't do anything
+     */
+    private function skipBraceBlock()
+    {
+        $braces = 0;
+        while ($this->index < $this->count) {
+            $token = $this->token();
+
+            if ($token === [null, '{', null]) {
+                $braces++;
+            } elseif ($token === [null, '}', null]) {
+                $braces--;
+            }
+
+            $this->index++;
+            if ($braces == 0) {
+                break;
+            }
+        }
     }
 
     /**

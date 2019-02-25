@@ -62,9 +62,9 @@ class Parser
         $braces            = 0;
         $namespace         = '';
         $class             = '';
-        $classBrace        = 0;
+        $classBrace        = -1;
         $function          = '';
-        $functionBrace     = 0;
+        $functionBrace     = -1;
         $useFunctionNative = false;
         foreach ($this->reducedTokens() as $type => $value) {
             if (self::T_BRACE_OPEN === $type) {
@@ -96,7 +96,6 @@ class Parser
                 } elseif (self::T_FUNCTION === $type) {
                     $function      = $value;
                     $functionBrace = $braces;
-
                     if (!$class && strtolower($value) === $this->target) {
                         $this->addConflict($namespace);
                     }
@@ -126,9 +125,9 @@ class Parser
 
             if ($token[0] === T_WHITESPACE) {
                 // skip whitespaces
-            } elseif ($token[0] === null && $token[1] === '{') {
+            } elseif ($token === [null, '{', null]) {
                 yield self::T_BRACE_OPEN => '{';
-            } elseif ($token[0] === null && $token[1] === '}') {
+            } elseif ($token === [null, '}', null]) {
                 yield self::T_BRACE_CLOSE => '}';
             } elseif ($token[0] === T_NAMESPACE) {
                 yield self::T_NAMESPACE => $this->getFollowingString(1, -1);
@@ -144,6 +143,8 @@ class Parser
                 }
             } elseif ($token[0] === T_OBJECT_OPERATOR) {
                 $this->getFollowingString(1, -1); // skip method call
+            } elseif ($token[0] === T_NEW) {
+                $this->getFollowingString(1, -1); // skip class instanciation
             } elseif ($token[0] === T_FUNCTION) {
                 $string = $this->getFollowingString(1);
                 if ($this->token() === [null, '(', null]) {
@@ -151,6 +152,7 @@ class Parser
                 }
             } elseif ($token[0] === T_CLASS) {
                 yield self::T_CLASS => $this->getFollowingString(1, -1);
+                $this->forwardTo([null, '{', null], 1, -1);
             } elseif ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
                 $string = $this->getFollowingString();
                 if ($this->token() === [null, '(', null]) {
@@ -217,6 +219,20 @@ class Parser
         while ($this->token()[0] === T_WHITESPACE) {
             $this->index++;
         }
+    }
+
+    /**
+     * @param array $token
+     * @param int   $jumpBefore
+     * @param int   $jumpAfter
+     */
+    private function forwardTo($token, $jumpBefore = 0, $jumpAfter = 0)
+    {
+        $this->index += $jumpBefore;
+        while ($this->token() !== $token) {
+            $this->index++;
+        }
+        $this->index += $jumpAfter;
     }
 
     /**

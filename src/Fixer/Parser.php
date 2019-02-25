@@ -154,6 +154,9 @@ class Parser
      */
     private function token()
     {
+        if (!isset($this->tokens[$this->index])) {
+            return [null, null, null];
+        }
         $token = $this->tokens[$this->index];
         if (\is_array($token)) {
             return $token;

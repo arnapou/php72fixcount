@@ -32,4 +32,13 @@ class ParserUnfixableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $parser->getFixable(), 'fixable');
         $this->assertSame([], $parser->getUnfixable(), 'unfixable');
     }
+
+    public function testUseNativeCount()
+    {
+        $parser = new Parser(__DIR__ . '/../data/unfixable/UseNativeCount.php');
+
+        $this->assertSame([], $parser->getConflicts(), 'conflict');
+        $this->assertSame([], $parser->getFixable(), 'fixable');
+        $this->assertSame(['FixCount\Test\UseNativeCount' => 1], $parser->getUnfixable(), 'unfixable');
+    }
 }

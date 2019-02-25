@@ -149,4 +149,32 @@ class ParserReducerTest extends TestCase
             $this->reduceTokens(__DIR__ . '/../data/conflicts/UseFunctionAlias.php')
         );
     }
+
+    public function testCurly()
+    {
+        $this->assertSame(
+            [
+                [Parser::T_NAMESPACE => 'FixCount\Test\Curly'],
+                [Parser::T_CLASS => 'Curly'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_FUNCTION => 'T_CURLY_OPEN'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_BRACE_CLOSE => '}'],
+                [Parser::T_BRACE_CLOSE => '}'],
+                [Parser::T_FUNCTION => 'T_DOLLAR_OPEN_CURLY_BRACES'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_BRACE_CLOSE => '}'],
+                [Parser::T_BRACE_CLOSE => '}'],
+                [Parser::T_FUNCTION => 'T_STRING_VARNAME'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_BRACE_OPEN => '{'],
+                [Parser::T_BRACE_CLOSE => '}'],
+                [Parser::T_BRACE_CLOSE => '}'],
+                [Parser::T_BRACE_CLOSE => '}'],
+            ],
+            $this->reduceTokens(__DIR__ . '/../data/other/Curly.php')
+        );
+    }
 }

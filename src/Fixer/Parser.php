@@ -131,7 +131,7 @@ class Parser
 
             if ($token[0] === T_WHITESPACE) {
                 // skip whitespaces
-            } elseif ($token === [null, '{', null]) {
+            } elseif ($token === [null, '{', null] || $token[0] === T_CURLY_OPEN || $token[0] === T_STRING_VARNAME) {
                 yield self::T_BRACE_OPEN => '{';
             } elseif ($token === [null, '}', null]) {
                 yield self::T_BRACE_CLOSE => '}';

@@ -29,10 +29,22 @@ class Files implements \IteratorAggregate
      */
     public function getIterator()
     {
+        $php72fixcount_basedir = realpath(__DIR__ . '/../..');
         return new \CallbackFilterIterator(
             new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->path)),
-            function (\SplFileInfo $file, $key, $iterator) {
-                return $file->isFile() && \in_array(pathinfo($file->getPathname(), PATHINFO_EXTENSION), $this->extensions);
+            function (\SplFileInfo $file, $key, $iterator) use ($php72fixcount_basedir) {
+                if (/* directories ignored */
+                    !$file->isFile() ||
+                    /* extension not allowed */
+                    !\in_array(pathinfo($file->getPathname(), PATHINFO_EXTENSION), $this->extensions) ||
+                    /* ignore php71fixcount folder */
+                    $php72fixcount_basedir && strpos($file->getRealPath(), "$php72fixcount_basedir/") === 0 ||
+                    /* ignore php71fixcount generated files (security if $php72fixcount_basedir is empty) */
+                    \in_array($file->getBasename(), ['generated.php72fix.count.php', 'generated.php72fix.sizeof.php'])
+                ) {
+                    return false;
+                }
+                return true;
             }
         );
     }

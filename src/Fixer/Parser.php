@@ -7,6 +7,7 @@ class Parser
     const T_BRACE_OPEN = 'brace open';
     const T_BRACE_CLOSE = 'brace close';
     const T_CLASS = 'class';
+    const T_TRAIT = 'trait';
     const T_FUNCTION = 'function';
     const T_FUNCTION_CALL = 'function call';
     const T_NAMESPACE = 'namespace';
@@ -95,7 +96,7 @@ class Parser
                             $this->addConflict($namespace);
                         }
                     }
-                } elseif (self::T_CLASS === $type) {
+                } elseif (self::T_CLASS === $type || self::T_TRAIT === $type) {
                     $class      = $value;
                     $classBrace = $braces;
                 } elseif (self::T_FUNCTION === $type) {
@@ -156,8 +157,11 @@ class Parser
                     yield self::T_FUNCTION => $string;
                 }
             } elseif ($token[0] === T_CLASS) {
-                yield self::T_CLASS => $this->getFollowingString(1, -1);
-                $this->forwardToNextOpenBrace(1);
+                yield self::T_CLASS => $this->getFollowingString(1);
+                $this->forwardToNextOpenBrace(0, -1);
+            } elseif ($token[0] === T_TRAIT) {
+                yield self::T_TRAIT => $this->getFollowingString(1);
+                $this->forwardToNextOpenBrace(0, -1);
             } elseif ($token[0] === T_INTERFACE) {
                 $this->forwardToNextOpenBrace();
                 $this->skipBraceBlock();
@@ -229,14 +233,17 @@ class Parser
     }
 
     /**
+     * skip all and stop on first opened brace found
      * @param int $jumpBefore
+     * @param int $jumpAfter
      */
-    private function forwardToNextOpenBrace($jumpBefore = 0)
+    private function forwardToNextOpenBrace($jumpBefore = 0, $jumpAfter = 0)
     {
         $this->index += $jumpBefore;
         while ($this->token() !== [null, '{', null]) {
             $this->index++;
         }
+        $this->index += $jumpAfter;
     }
 
     /**

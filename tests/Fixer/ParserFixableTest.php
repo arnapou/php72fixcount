@@ -15,6 +15,15 @@ class ParserFixableTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['FixCount\\Test\\NormalClass' => 3], $parser->getUnfixable(), 'unfixable');
     }
 
+    public function testNormalTrait()
+    {
+        $parser = new Parser(__DIR__ . '/../data/fixable/NormalTrait.php');
+
+        $this->assertSame([], $parser->getConflicts(), 'conflict');
+        $this->assertSame(['FixCount\\Test\\NormalTrait' => 2], $parser->getFixable(), 'fixable');
+        $this->assertSame(['FixCount\\Test\\NormalTrait' => 3], $parser->getUnfixable(), 'unfixable');
+    }
+
     public function testMultipleNamespace()
     {
         $parser = new Parser(__DIR__ . '/../data/fixable/MultipleNamespace.php');

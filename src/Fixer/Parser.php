@@ -40,6 +40,10 @@ class Parser
      * @var string
      */
     private $target;
+    /**
+     * @var string
+     */
+    private $filename;
 
     /**
      * Parser constructor.
@@ -51,9 +55,10 @@ class Parser
         if (!\in_array($target, ['count', 'sizeof'])) {
             throw new \InvalidArgumentException("Target argument is not valid, it should be 'count' or 'sizeof'.");
         }
-        $this->target = $target;
-        $this->tokens = token_get_all(file_get_contents($filename));
-        $this->count  = \count($this->tokens);
+        $this->target   = $target;
+        $this->filename = $filename;
+        $this->tokens   = token_get_all(file_get_contents($filename));
+        $this->count    = \count($this->tokens);
         $this->parse();
     }
 

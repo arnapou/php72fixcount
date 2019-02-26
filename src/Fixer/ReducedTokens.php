@@ -39,6 +39,14 @@ class ReducedTokens implements \IteratorAggregate
     }
 
     /**
+     * @return Traversable
+     */
+    public function getIterator()
+    {
+        return $this->reduce();
+    }
+
+    /**
      * @return \Generator
      */
     private function reduce()
@@ -188,14 +196,6 @@ class ReducedTokens implements \IteratorAggregate
                 break;
             }
         }
-    }
-
-    /**
-     * @return Traversable
-     */
-    public function getIterator()
-    {
-        return $this->reduce();
     }
 
     /**

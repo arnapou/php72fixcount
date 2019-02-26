@@ -76,7 +76,7 @@ class ReducedTokens implements \IteratorAggregate
                         break;
                     case T_USE:
                         if ($useFunction = $this->fetchUseFunction()) {
-                            yield[self::T_USE_FUNCTION, $useFunction];
+                            yield [self::T_USE_FUNCTION, $useFunction];
                         }
                         break;
                     case T_OBJECT_OPERATOR: // skip method call          ->xxx()
@@ -87,7 +87,7 @@ class ReducedTokens implements \IteratorAggregate
                         break;
                     case T_FUNCTION:
                         if ($function = $this->fetchFunction()) {
-                            yield[self::T_FUNCTION, $function];
+                            yield [self::T_FUNCTION, $function];
                         }
                         break;
                     case T_CLASS:
@@ -110,7 +110,7 @@ class ReducedTokens implements \IteratorAggregate
                     case T_STRING:
                     case T_NS_SEPARATOR:
                         if ($functionCall = $this->fetchFunctionCall()) {
-                            yield[self::T_FUNCTION_CALL, $functionCall];
+                            yield [self::T_FUNCTION_CALL, $functionCall];
                         }
                         break;
                 }

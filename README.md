@@ -60,24 +60,43 @@ In your `composer.json` :
     },
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/bin/php72-fix-count.php --quiet src vendor",
-            "@php vendor/bin/php72-fix-sizeof.php --quiet src vendor"
+            "@php vendor/bin/php72-fix-count.php --quiet generate src vendor",
+            "@php vendor/bin/php72-fix-sizeof.php --quiet generate src vendor"
         ]
     }
 
-Usage of `php72-fix-count.php` and `php72-fix-sizeof.php` :
+Usage of `php72-fix-count.php` (same for `php72-fix-sizeof.php`) :
 
-    php php72-fix-count.php [--quiet] directory [...]
-    php php72-fix-sizeof.php [--quiet] directory [...]
+    PHP 7.2 FIX COUNT
+    
+    DESCRIPTION
+        This command generate php files which are loaded by composer
+        in order to fix/hack the breaking change of the count/sizeof
+        breaking change for php 7.2+
+    
+    SYSNOPSIS
+        php php72-fix-count.php [OPTION] COMMAND DIRECTORY...
+    
+    OPTION
+        --quiet    silent mode (usefull for composer post-autoload-dump)
+    
+    COMMAND
+        generate   generate the fixes
+        clean      remove the fixes
+    
+    EXAMPLES
+        php php72-fix-count.php --quiet generate src vendor
+        php php72-fix-count.php clean
+
 
 You must add all directories in the same command line because each script execution will override the generated fix, **DON'T** do that :
 
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/bin/php72-fix-count.php --quiet src ",             |  DOES
-            "@php vendor/bin/php72-fix-count.php --quiet vendor",           |  NOT 
-            "@php vendor/bin/php72-fix-sizeof.php --quiet src",             |  WORK
-            "@php vendor/bin/php72-fix-sizeof.php --quiet vendor",          |  !!!
+            "@php vendor/bin/php72-fix-count.php --quiet generate src ",             |  DOES
+            "@php vendor/bin/php72-fix-count.php --quiet generate vendor",           |  NOT 
+            "@php vendor/bin/php72-fix-sizeof.php --quiet generate src",             |  WORK
+            "@php vendor/bin/php72-fix-sizeof.php --quiet generate vendor",          |  !!!
         ]
     }
 

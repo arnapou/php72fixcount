@@ -50,7 +50,7 @@ class Parser
         $function          = '';
         $functionBrace     = -1;
         $useFunctionNative = false;
-        foreach ($reducedTokens as $type => $value) {
+        foreach ($reducedTokens as list($type, $value)) {
             if (ReducedTokens::T_BRACE_OPEN === $type) {
                 $braces++;
             } elseif (ReducedTokens::T_BRACE_CLOSE === $type) {

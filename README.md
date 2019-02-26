@@ -25,9 +25,10 @@ The previous php 7.2 behaviour for non-countable argument was :
 * Legacy dependencies unmaintened from years your project still need and you don't want/have the time to fork them to fix `count()`
 * You admit the tool won't cover 100% use cases (see further) and you will probaby have a few fixes to do manually
 
-Realistically:
+### Realistically
  
- * I used this "fix" on a 1M lines legacy project with thousands of count calls without any problem.
+ * I used this "fix" on a 1M lines legacy project with thousands of count calls without any problem. With vendors
+   it grew to 2.5M of lines and more than 13k files. The analysis take on average 400+ files/sec and 80k+ lines/sec
  * It took me later more than one week of full time to migrate manually each "count" in the project, but I keep 
    the fixer in the project because of legacy dependencies unmaintened for several years.
  * In reality, nobody wanted to use `count` on integers, string or else, but arrays coming from various sources 

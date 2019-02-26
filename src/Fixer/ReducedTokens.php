@@ -45,138 +45,124 @@ class ReducedTokens implements \IteratorAggregate
     {
         $this->index = 0;
         while ($this->index < $this->count) {
-            $token = $this->token();
+            $token = $this->tokens[$this->index];
 
-            if ($this->isOpenBrace($token)) {
-                yield [self::T_BRACE_OPEN, '{'];
-            } elseif ($this->isCloseBrace($token)) {
-                yield [self::T_BRACE_CLOSE, '}'];
-            } elseif ($token[0] === T_NAMESPACE) {
-                yield [self::T_NAMESPACE, $this->fetchFollowingString(1, -1)];
-            } elseif ($token[0] === T_USE) {
-                $this->ignoreFollowingWhitespaces(1);
-                if ($this->token()[0] === T_FUNCTION) {
-                    $string = $this->fetchFollowingString(1);
-                    if ($this->token()[0] === T_AS) {
-                        yield[self::T_USE_FUNCTION, [ltrim($string, '\\'), $this->fetchFollowingString(1)]];
-                    } else {
-                        yield [self::T_USE_FUNCTION, [ltrim($string, '\\'), ltrim(substr($string, strrpos($string, '\\') ?: 0), '\\')]];
-                    }
-                }
-            } elseif ($token[0] === T_OBJECT_OPERATOR) {
-                $this->fetchFollowingString(1, -1); // skip method call
-            } elseif ($token[0] === T_NEW) {
-                $this->fetchFollowingString(1, -1); // skip class instanciation
-            } elseif ($token[0] === T_FUNCTION) {
-                $string = $this->fetchFollowingString(1);
-                if ($this->token() === [null, '(']) {
-                    yield [self::T_FUNCTION, $string];
-                }
-            } elseif ($token[0] === T_CLASS) {
-                yield [self::T_CLASS, $this->fetchFollowingString(1)];
-                $this->forwardToNextOpenBrace(0, -1);
-            } elseif ($token[0] === T_TRAIT) {
-                yield [self::T_TRAIT, $this->fetchFollowingString(1)];
-                $this->forwardToNextOpenBrace(0, -1);
-            } elseif ($token[0] === T_INTERFACE) {
-                $this->skipNextBraceBlock();
-            } elseif ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
-                $string = $this->fetchFollowingString();
-                if ($this->token() === [null, '(']) {
-                    yield [self::T_FUNCTION_CALL, $string];
+            if (\is_string($token)) {
+                $token = [$token];
+            }
+            if (\is_array($token)) {
+                switch ($token[0]) {
+                    case '{':
+                    case T_CURLY_OPEN:
+                    case T_STRING_VARNAME:
+                        yield [self::T_BRACE_OPEN, '{'];
+                        break;
+                    case '}':
+                        yield [self::T_BRACE_CLOSE, '}'];
+                        break;
+                    case T_NAMESPACE:
+                        $this->index++;
+                        $string = $this->fetchNextString();
+                        yield [self::T_NAMESPACE, $string];
+                        $this->index--;
+                        break;
+                    case T_USE:
+                        if ($useFunction = $this->fetchUseFunction()) {
+                            yield[self::T_USE_FUNCTION, $useFunction];
+                        }
+                        break;
+                    case T_OBJECT_OPERATOR: // skip method call          ->xxx()
+                    case T_NEW:             // skip class instanciation  new xxx()
+                        $this->index++;
+                        $this->fetchNextString();
+                        $this->index--;
+                        break;
+                    case T_FUNCTION:
+                        if ($function = $this->fetchFunction()) {
+                            yield[self::T_FUNCTION, $function];
+                        }
+                        break;
+                    case T_CLASS:
+                        $this->index++;
+                        $string = $this->fetchNextString();
+                        yield [self::T_CLASS, $string];
+                        $this->forwardToNextOpenBrace();
+                        $this->index--;
+                        break;
+                    case T_TRAIT:
+                        $this->index++;
+                        $string = $this->fetchNextString();
+                        yield [self::T_TRAIT, $string];
+                        $this->forwardToNextOpenBrace();
+                        $this->index--;
+                        break;
+                    case T_INTERFACE:
+                        $this->skipNextBraceBlock();
+                        break;
+                    case T_STRING:
+                    case T_NS_SEPARATOR:
+                        if ($functionCall = $this->fetchFunctionCall()) {
+                            yield[self::T_FUNCTION_CALL, $functionCall];
+                        }
+                        break;
                 }
             }
+
             $this->index++;
         }
     }
 
     /**
-     * @param array $token
-     * @return bool
-     */
-    private function isOpenBrace(array $token)
-    {
-        return $token === [null, '{'] || $token[0] === T_CURLY_OPEN || $token[0] === T_STRING_VARNAME;
-    }
-
-    /**
-     * @param array $token
-     * @return bool
-     */
-    private function isCloseBrace(array $token)
-    {
-        return $token === [null, '}'];
-    }
-
-    /**
-     * normalize tokens
-     * @return array
-     */
-    private function token()
-    {
-        if (!isset($this->tokens[$this->index])) {
-            return [null, null];
-        }
-        $token = $this->tokens[$this->index];
-        if (\is_array($token)) {
-            return [$token[0], $token[1]];
-        } elseif (\is_string($token)) {
-            return [null, $token];
-        } else {
-            return [null, null];
-        }
-    }
-
-    /**
-     * @param int $jumpBefore
-     * @param int $jumpAfter
      * @return string
      */
-    private function fetchFollowingString($jumpBefore = 0, $jumpAfter = 0)
+    private function fetchNextString()
     {
-        $this->index += $jumpBefore;
-
         $string = '';
         while ($this->index < $this->count) {
-            $token = $this->token();
-            if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_DOUBLE_COLON) {
-                $string .= $token[1];
-                $this->index++;
-            } elseif ($token[0] === T_WHITESPACE) {
-                $this->index++;
-            } else {
+            $token = $this->tokens[$this->index];
+            if (!\is_array($token)) {
                 break;
             }
+            switch ($token[0]) {
+                case T_STRING:
+                case T_NS_SEPARATOR:
+                case T_DOUBLE_COLON:
+                    $string .= $token[1];
+                    $this->index++;
+                    break;
+                case T_WHITESPACE:
+                    $this->index++;
+                    break;
+                default:
+                    break 2;
+            }
         }
-
-        $this->index += $jumpAfter;
         return $string;
     }
 
-    /**
-     * @param int $jumpBefore
-     */
-    private function ignoreFollowingWhitespaces($jumpBefore = 0)
+    private function skipWhitespaces()
     {
-        $this->index += $jumpBefore;
-
-        while ($this->token()[0] === T_WHITESPACE) {
+        while ($this->index < $this->count) {
+            $token = $this->tokens[$this->index];
+            if (!\is_array($token) || $token[0] !== T_WHITESPACE) {
+                break;
+            }
             $this->index++;
         }
     }
 
     /**
-     * skip all and stop on first opened brace found
-     * @param int $jumpBefore
-     * @param int $jumpAfter
+     * skip all tokens and stop on first opened brace found
      */
-    private function forwardToNextOpenBrace($jumpBefore = 0, $jumpAfter = 0)
+    private function forwardToNextOpenBrace()
     {
-        $this->index += $jumpBefore;
-        while (!$this->isOpenBrace($this->token())) {
+        while ($this->index < $this->count) {
+            $token = $this->tokens[$this->index];
+            if ($token === '{' || \is_array($token) && ($token[0] === T_CURLY_OPEN || $token[0] === T_STRING_VARNAME)) {
+                break;
+            }
             $this->index++;
         }
-        $this->index += $jumpAfter;
     }
 
     /**
@@ -189,11 +175,11 @@ class ReducedTokens implements \IteratorAggregate
         $this->index++;
 
         while ($this->index < $this->count) {
-            $token = $this->token();
+            $token = $this->tokens[$this->index];
 
-            if ($this->isOpenBrace($token)) {
+            if ($token === '{' || \is_array($token) && ($token[0] === T_CURLY_OPEN || $token[0] === T_STRING_VARNAME)) {
                 $braces++;
-            } elseif ($this->isCloseBrace($token)) {
+            } elseif ($token === [null, '}']) {
                 $braces--;
             }
 
@@ -210,5 +196,64 @@ class ReducedTokens implements \IteratorAggregate
     public function getIterator()
     {
         return $this->reduce();
+    }
+
+    /**
+     * @return array|null
+     */
+    private function fetchUseFunction()
+    {
+        $this->index++; // jump over the T_USE
+        $this->skipWhitespaces();
+        if ($this->index < $this->count) {
+            $token = $this->tokens[$this->index];
+            if (\is_array($token) && $token[0] === T_FUNCTION) {
+                $this->index++; // jump over the T_FUNCTION
+                $string = $this->fetchNextString();
+                if ($string && $this->index < $this->count) {
+                    $token = $this->tokens[$this->index];
+                    if (\is_array($token) && $token[0] === T_AS) {
+                        // use function <function> as <alias>
+                        $this->index++;
+                        return [ltrim($string, '\\'), $this->fetchNextString()];
+                    } else {
+                        // use function <function>    => we calculate the alias
+                        return [ltrim($string, '\\'), ltrim(substr($string, strrpos($string, '\\') ?: 0), '\\')];
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return string|null
+     */
+    private function fetchFunction()
+    {
+        $this->index++; // jump over the T_FUNCTION
+        $string = $this->fetchNextString();
+        if ($string && $this->index < $this->count) {
+            $token = $this->tokens[$this->index];
+            if ($token === '(') {
+                return $string;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return string|null
+     */
+    private function fetchFunctionCall()
+    {
+        $string = $this->fetchNextString();
+        if ($string && $this->index < $this->count) {
+            $token = $this->tokens[$this->index];
+            if ($token === '(') {
+                return $string;
+            }
+        }
+        return null;
     }
 }

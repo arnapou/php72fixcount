@@ -26,15 +26,16 @@ if (PHP_VERSION_ID < 70200) {
     $arguments->usage('Php version < 7.2 : this script is useless');
 }
 
-$PHP72FIXCOUNT_TARGET = $PHP72FIXCOUNT_TARGET ?? 'count';
-$generatedFile        = __DIR__ . "/generated.php72fix.$PHP72FIXCOUNT_TARGET.php";
-
 switch ($arguments->getCommand()) {
     case 'clean':
-        file_put_contents($generatedFile, "<php \n", LOCK_EX);
+        foreach (['count', 'sizeof'] as $target) {
+            file_put_contents(__DIR__ . "/generated.php72fix.$target.php", "<php \n", LOCK_EX);
+        }
         break;
     case 'generate':
-        $fixer = new Fixer($PHP72FIXCOUNT_TARGET);
-        $fixer->execute($arguments->getPaths(), $generatedFile, $arguments->getOptions());
+        $fixer = new Fixer($arguments->getPaths(), $arguments->getOptions());
+        foreach (['count', 'sizeof'] as $target) {
+            $fixer->writeTo($target, __DIR__ . "/generated.php72fix.$target.php");
+        }
         break;
 }

@@ -28,6 +28,24 @@ class ReducedTokensTest extends TestCase
         );
     }
 
+    public function testUseNativeCount()
+    {
+        $this->assertSame(
+            [
+                [ReducedTokens::T_NAMESPACE, 'FixCount\Test\UseNativeCount'],
+                [ReducedTokens::T_USE_FUNCTION, ['count', 'count']],
+                [ReducedTokens::T_CLASS, 'UseNativeCount'],
+                [ReducedTokens::T_BRACE_OPEN, '{'],
+                [ReducedTokens::T_FUNCTION, 'test'],
+                [ReducedTokens::T_BRACE_OPEN, '{'],
+                [ReducedTokens::T_FUNCTION_CALL, 'count'],
+                [ReducedTokens::T_BRACE_CLOSE, '}'],
+                [ReducedTokens::T_BRACE_CLOSE, '}'],
+            ],
+            $this->reduceTokens(__DIR__ . '/../data/unfixable/UseNativeCount.php')
+        );
+    }
+
     public function testNoNamespace()
     {
         $this->assertSame(

@@ -4,22 +4,7 @@ namespace Arnapou\Php72FixCount\Fixer;
 
 class Parser
 {
-    /**
-     * @var array
-     */
-    private $foundConflicts = [];
-    /**
-     * @var array
-     */
-    private $foundFixable = [];
-    /**
-     * @var array
-     */
-    private $foundUnfixable = [];
-    /**
-     * @var string
-     */
-    private $target;
+    use TargetTrait;
     /**
      * @var string
      */
@@ -28,14 +13,9 @@ class Parser
     /**
      * Parser constructor.
      * @param string $filename
-     * @param string $target 'count' or 'sizeof'
      */
-    public function __construct($filename, $target = 'count')
+    public function __construct($filename)
     {
-        if (!\in_array($target, ['count', 'sizeof'])) {
-            throw new \InvalidArgumentException("Target argument is not valid, it should be 'count' or 'sizeof'.");
-        }
-        $this->target   = $target;
         $this->filename = $filename;
         $this->parse();
     }
@@ -66,12 +46,12 @@ class Parser
                 $useFunctionNative = false;
             } elseif ($namespace) {
                 if (ReducedTokens::T_USE_FUNCTION === $type) {
-                    if (strtolower($value[1]) === $this->target) {
-                        if (strtolower($value[0]) === $this->target) {
+                    $target = strtolower($value[1]);
+                    if (\in_array($target, $this->targets)) {
+                        if (strtolower($value[0]) === $target) {
                             $useFunctionNative = true;
-                            $this->addUnfixable($namespace);
                         } else {
-                            $this->addConflict($namespace);
+                            $this->addConflict($target, $namespace);
                         }
                     }
                 } elseif (ReducedTokens::T_CLASS === $type || ReducedTokens::T_TRAIT === $type) {
@@ -80,18 +60,20 @@ class Parser
                 } elseif (ReducedTokens::T_FUNCTION === $type) {
                     $function      = $value;
                     $functionBrace = $braces;
-                    if (!$class && strtolower($value) === $this->target) {
-                        $this->addConflict($namespace);
+                    $target        = strtolower($value);
+                    if (!$class && \in_array($target, $this->targets)) {
+                        $this->addConflict($target, $namespace);
                     }
                 } elseif (ReducedTokens::T_FUNCTION_CALL === $type) {
-                    if (strtolower($value) === $this->target) {
+                    $target = strtolower($value);
+                    if (\in_array($target, $this->targets)) {
                         if ($useFunctionNative) {
-                            $this->addUnfixable($namespace);
+                            $this->addUnfixable($target, $namespace);
                         } else {
-                            $this->addFixable($namespace);
+                            $this->addFixable($target, $namespace);
                         }
-                    } elseif (strtolower($value) === '\\' . $this->target) {
-                        $this->addUnfixable($namespace);
+                    } elseif (\in_array($target, $this->backslashTargets)) {
+                        $this->addUnfixable(ltrim($target, '\\'), $namespace);
                     }
                 }
             }
@@ -99,50 +81,30 @@ class Parser
     }
 
     /**
+     * @param string $target
      * @param string $namespace
      */
-    private function addConflict($namespace)
+    private function addConflict($target, $namespace)
     {
-        $this->foundConflicts[$namespace] = isset($this->foundConflicts[$namespace]) ? $this->foundConflicts[$namespace] + 1 : 1;
+        $this->conflicts[$target][$namespace] = isset($this->conflicts[$target][$namespace]) ? $this->conflicts[$target][$namespace] + 1 : 1;
     }
 
     /**
+     * @param string $target
      * @param string $namespace
      */
-    private function addFixable($namespace)
+    private function addFixable($target, $namespace)
     {
-        $this->foundFixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
+        $this->fixable[$target][$namespace] = isset($this->fixable[$target][$namespace]) ? $this->fixable[$target][$namespace] + 1 : 1;
     }
 
     /**
+     * @param string $target
      * @param string $namespace
      */
-    private function addUnfixable($namespace)
+    private function addUnfixable($target, $namespace)
     {
-        $this->foundUnfixable[$namespace] = isset($this->foundFixable[$namespace]) ? $this->foundFixable[$namespace] + 1 : 1;
+        $this->unfixable[$target][$namespace] = isset($this->unfixable[$target][$namespace]) ? $this->unfixable[$target][$namespace] + 1 : 1;
     }
 
-    /**
-     * @return array
-     */
-    public function getConflicts()
-    {
-        return $this->foundConflicts;
-    }
-
-    /**
-     * @return array
-     */
-    public function getFixable()
-    {
-        return $this->foundFixable;
-    }
-
-    /**
-     * @return array
-     */
-    public function getUnfixable()
-    {
-        return $this->foundUnfixable;
-    }
 }

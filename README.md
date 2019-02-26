@@ -61,12 +61,11 @@ In your `composer.json` :
     },
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/bin/php72-fix-count.php --quiet generate src vendor",
-            "@php vendor/bin/php72-fix-sizeof.php --quiet generate src vendor"
+            "@php vendor/bin/php72-fix-count.php --quiet generate src vendor"
         ]
     }
 
-Usage of `php72-fix-count.php` (same for `php72-fix-sizeof.php`) :
+Usage of `php72-fix-count.php` :
 
     PHP 7.2 FIX COUNT
     
@@ -94,10 +93,8 @@ You must add all directories in the same command line because each script execut
 
     "scripts": {
         "post-autoload-dump": [
-            "@php vendor/bin/php72-fix-count.php --quiet generate src ",             |  DOES
-            "@php vendor/bin/php72-fix-count.php --quiet generate vendor",           |  NOT 
-            "@php vendor/bin/php72-fix-sizeof.php --quiet generate src",             |  WORK
-            "@php vendor/bin/php72-fix-sizeof.php --quiet generate vendor",          |  !!!
+            "@php vendor/bin/php72-fix-count.php --quiet generate src ",             |  DOES NOT
+            "@php vendor/bin/php72-fix-count.php --quiet generate vendor"            |  WORK !!!
         ]
     }
 

@@ -6,61 +6,47 @@ use Arnapou\Php72FixCount\Php72;
 
 class Fixer
 {
+    use TargetTrait;
+
     /**
      * @var array
      */
-    private $fixable = [];
+    private $paths;
     /**
      * @var array
      */
-    private $unfixable = [];
-    /**
-     * @var array
-     */
-    private $conflicts = [];
-    /**
-     * @var string
-     */
-    private $target;
+    private $options;
 
     /**
      * Fixer constructor.
-     * @param string $target 'count' or 'sizeof'
+     * @param array $paths
+     * @param array $options
      */
-    public function __construct($target = 'count')
+    public function __construct(array $paths, array $options = [])
     {
-        if (!\in_array($target, ['count', 'sizeof'])) {
-            throw new \InvalidArgumentException("Target argument is not valid, it should be 'count' or 'sizeof'.");
-        }
-        $this->target = $target;
+        $this->paths   = $paths;
+        $this->options = $options + ShellArguments::getDefaultOptions();
+        $this->execute();
     }
 
     /**
-     * @param array  $paths
-     * @param array  $options
-     * @param string $outputFile
      */
-    public function execute(array $paths, $outputFile, array $options = [])
+    public function execute()
     {
-        $options         = $options + ShellArguments::getDefaultOptions();
-        $this->fixable   = [];
-        $this->unfixable = [];
-        $this->conflicts = [];
-
-        foreach ($paths as $path) {
+        foreach ($this->paths as $path) {
             if (is_dir($path)) {
                 foreach (new Files($path, ['php']) as $file) {
-                    $this->analyze($file->getPathname(), $options);
+                    $this->analyze($file->getPathname(), $this->options);
                 }
             } elseif (is_file($path)) {
-                $this->analyze($path, $options);
+                $this->analyze($path, $this->options);
             }
         }
 
-        $this->unfixable = array_diff_key($this->unfixable, $this->fixable);
-        $this->fixable   = array_diff_key($this->fixable, $this->conflicts);
-
-        $this->writeTo($outputFile);
+        foreach ($this->targets as $target) {
+            $this->unfixable[$target] = array_diff_key($this->unfixable[$target], $this->fixable[$target]);
+            $this->fixable[$target]   = array_diff_key($this->fixable[$target], $this->conflicts[$target]);
+        }
     }
 
     /**
@@ -69,44 +55,51 @@ class Fixer
      */
     protected function analyze($filename, array $options)
     {
-        $parser = new Parser($filename, $this->target);
+        $parser = new Parser($filename);
 
-        foreach ($parser->getConflicts() as $ns => $count) {
-            if (!$options['quiet']) {
-                echo "$filename | CONFLICT | $ns\n";
+        foreach ($this->targets as $target) {
+            foreach ($parser->getConflicts($target) as $ns => $count) {
+                if (!$options['quiet']) {
+                    echo "$target | $filename | CONFLICT | $ns\n";
+                }
+                $this->conflicts[$target][$ns] = isset($this->conflicts[$target][$ns]) ? $this->conflicts[$target][$ns] + $count : $count;
             }
-            $this->conflicts[$ns] = isset($this->conflicts[$ns]) ? $this->conflicts[$ns] + $count : $count;
-        }
 
-        foreach ($parser->getFixable() as $ns => $count) {
-            if (!$options['quiet']) {
-                $s = $count == 1 ? ' ' : 's';
-                echo "$filename | " . str_pad($count, 2, ' ', STR_PAD_LEFT) . " call$s" . " | $ns\n";
+            foreach ($parser->getFixable($target) as $ns => $count) {
+                if (!$options['quiet']) {
+                    $s = $count == 1 ? ' ' : 's';
+                    echo "$target | $filename | " . str_pad($count, 2, ' ', STR_PAD_LEFT) . " call$s" . " | $ns\n";
+                }
+                $this->fixable[$target][$ns] = isset($this->fixable[$target][$ns]) ? $this->fixable[$target][$ns] + $count : $count;
             }
-            $this->fixable[$ns] = isset($this->fixable[$ns]) ? $this->fixable[$ns] + $count : $count;
-        }
 
-        foreach ($parser->getUnfixable() as $ns => $count) {
-            $this->unfixable[$ns] = isset($this->unfixable[$ns]) ? $this->unfixable[$ns] + $count : $count;
+            foreach ($parser->getUnfixable($target) as $ns => $count) {
+                $this->unfixable[$target][$ns] = isset($this->unfixable[$target][$ns]) ? $this->unfixable[$target][$ns] + $count : $count;
+            }
         }
     }
 
     /**
+     * @param string $target
      * @param string $outputFile
      */
-    protected function writeTo($outputFile)
+    public function writeTo($target, $outputFile)
     {
-        ksort($this->fixable);
-        ksort($this->unfixable);
-        ksort($this->conflicts);
+        if (!\in_array($target, $this->targets)) {
+            throw new \InvalidArgumentException('Target argument is invalid, correct values : ' . implode(', ', $this->targets));
+        }
 
-        $target       = $this->target;
+        ksort($this->fixable[$target]);
+        ksort($this->unfixable[$target]);
+        ksort($this->conflicts[$target]);
+
         $date         = date('l d F Y H:i:s');
-        $phpFixed     = self::getPhpFixedNamespaces(array_keys($this->fixable)) ?: '// nothing is fixable';
-        $phpUnfixed   = self::getPhpUnfixedNamespaces(array_keys($this->unfixable)) ?: '// nothing to list';
-        $phpConflicts = self::getPhpUnfixedNamespaces(array_keys($this->conflicts)) ?: '// nothing to list';
+        $phpFixed     = self::getPhpFixedNamespaces(array_keys($this->fixable[$target]), $target) ?: '// nothing is fixable';
+        $phpUnfixed   = self::getPhpUnfixedNamespaces(array_keys($this->unfixable[$target])) ?: '// nothing to list';
+        $phpConflicts = self::getPhpUnfixedNamespaces(array_keys($this->conflicts[$target])) ?: '// nothing to list';
 
-        file_put_contents($outputFile, "<?php
+        file_put_contents($outputFile,
+            "<?php
 
 /*
  * Generated: $date
@@ -116,6 +109,7 @@ $phpFixed
 
 /* 
  * Bellow are not fixed because \\$target is called
+ * or 'use function count' is used at the beginning
  */
 
 $phpUnfixed
@@ -127,14 +121,16 @@ $phpUnfixed
 
 $phpConflicts
 
-", LOCK_EX);
+",
+            LOCK_EX);
     }
 
     /**
-     * @param array $namespaces
+     * @param array  $namespaces
+     * @param string $target
      * @return string
      */
-    protected function getPhpFixedNamespaces(array $namespaces)
+    protected function getPhpFixedNamespaces(array $namespaces, $target)
     {
         $max = 0;
         $php = '';
@@ -142,8 +138,7 @@ $phpConflicts
             $n   = \strlen($namespace);
             $max = $n > $max ? $n : $max;
         }
-        $class  = Php72::class;
-        $target = $this->target;
+        $class = Php72::class;
         foreach ($namespaces as $namespace) {
             $namespace = str_pad($namespace, $max + 1, ' ', STR_PAD_RIGHT);
             $php       .= "namespace $namespace { function $target(\$item, \$mode = \\COUNT_NORMAL) { return \\$class::count(\$item, \$mode); } }\n";

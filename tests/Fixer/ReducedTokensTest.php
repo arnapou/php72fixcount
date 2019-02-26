@@ -28,6 +28,14 @@ class ReducedTokensTest extends TestCase
         );
     }
 
+    public function testNoNamespace()
+    {
+        $this->assertSame(
+            [],
+            $this->reduceTokens(__DIR__ . '/../data/unfixable/NoNamespace.php')
+        );
+    }
+
     public function testNoCount()
     {
         $this->assertSame(

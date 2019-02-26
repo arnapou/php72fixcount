@@ -52,6 +52,7 @@ class ReducedTokens implements \IteratorAggregate
     private function reduce()
     {
         $this->index = 0;
+        $this->forwardToFirstNamespace(); // we ignore files without namespace (perf matters)
         while ($this->index < $this->count) {
             $token = $this->tokens[$this->index];
 
@@ -153,6 +154,20 @@ class ReducedTokens implements \IteratorAggregate
         while ($this->index < $this->count) {
             $token = $this->tokens[$this->index];
             if (!\is_array($token) || $token[0] !== T_WHITESPACE) {
+                break;
+            }
+            $this->index++;
+        }
+    }
+
+    /**
+     * skip all tokens and stop on first namespace
+     */
+    private function forwardToFirstNamespace()
+    {
+        while ($this->index < $this->count) {
+            $token = $this->tokens[$this->index];
+            if (\is_array($token) && $token[0] === T_NAMESPACE) {
                 break;
             }
             $this->index++;

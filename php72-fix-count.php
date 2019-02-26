@@ -38,4 +38,7 @@ switch ($arguments->getCommand()) {
             $fixer->writeTo($target, __DIR__ . "/generated.php72fix.$target.php");
         }
         break;
+    case 'search':
+        $fixer = new Fixer($arguments->getPaths(), $arguments->getOptions());
+        break;
 }

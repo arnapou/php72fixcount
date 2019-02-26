@@ -82,6 +82,7 @@ Usage of `php72-fix-count.php` :
     
     COMMAND
         generate   generate the fixes
+        search     search the fixes (same as generate but no write)
         clean      remove the fixes
     
     EXAMPLES

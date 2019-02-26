@@ -26,7 +26,11 @@ class ShellArguments
     /**
      * @var array
      */
-    private static $possibleCommands = ['generate', 'clean'];
+    private static $possibleCommands = [
+        'generate',
+        'search',
+        'clean',
+    ];
 
     /**
      * Arguments constructor.
@@ -62,8 +66,11 @@ class ShellArguments
         if (empty($this->command)) {
             $this->usage();
         }
-        if ($this->command === 'generate' && empty($this->paths)) {
+        if (in_array($this->command, ['generate', 'search']) && empty($this->paths)) {
             $this->usage();
+        }
+        if ($this->command === 'search') {
+            $this->options['quiet'] = false;
         }
     }
 
@@ -156,6 +163,7 @@ class ShellArguments
             echo "\n";
             echo "COMMAND\n";
             echo "    generate   generate the fixes\n";
+            echo "    search     search the fixes (same as generate but no write)\n";
             echo "    clean      remove the fixes\n";
             echo "\n";
             echo "EXAMPLES\n";

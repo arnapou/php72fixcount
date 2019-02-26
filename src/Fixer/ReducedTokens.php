@@ -187,7 +187,7 @@ class ReducedTokens implements \IteratorAggregate
 
             if ($token === '{' || \is_array($token) && ($token[0] === T_CURLY_OPEN || $token[0] === T_STRING_VARNAME)) {
                 $braces++;
-            } elseif ($token === [null, '}']) {
+            } elseif ($token === '}') {
                 $braces--;
             }
 

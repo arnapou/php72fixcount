@@ -9,3 +9,7 @@ interface NoCountInInterface
     public function count();
 
 }
+
+// function here only to detect correctly the end of file
+// the test will fail if the brace block detection is bad
+end_of_file();

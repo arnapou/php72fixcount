@@ -22,6 +22,7 @@ class ReducedTokensTest extends TestCase
         $this->assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\NoCountInInterface'],
+                [ReducedTokens::T_FUNCTION_CALL, 'end_of_file'],
             ],
             $this->reduceTokens(__DIR__ . '/../data/unfixable/NoCountInInterface.php')
         );

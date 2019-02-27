@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Arnapou Php71FixCount package.
+ *
+ * (c) Arnaud Buathier <arnaud@arnapou.net>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Arnapou\Php72FixCount\Fixer;
 
 class Parser
@@ -36,10 +45,10 @@ class Parser
                 $useFunctionNative = false;
             } elseif ($namespace) {
                 switch ($type) {
-                    case ReducedTokens::T_BRACE_OPEN;
+                    case ReducedTokens::T_BRACE_OPEN:
                         $braces++;
                         break;
-                    case ReducedTokens::T_BRACE_CLOSE;
+                    case ReducedTokens::T_BRACE_CLOSE:
                         $braces--;
                         if ($class && $classBrace === $braces) {
                             $class = '';
@@ -48,7 +57,7 @@ class Parser
                             $function = '';
                         }
                         break;
-                    case ReducedTokens::T_USE_FUNCTION;
+                    case ReducedTokens::T_USE_FUNCTION:
                         $target = strtolower($value[1]);
                         if (\in_array($target, $this->targets)) {
                             if (strtolower($value[0]) === $target) {
@@ -58,12 +67,12 @@ class Parser
                             }
                         }
                         break;
-                    case ReducedTokens::T_CLASS;
-                    case ReducedTokens::T_TRAIT;
+                    case ReducedTokens::T_CLASS:
+                    case ReducedTokens::T_TRAIT:
                         $class      = $value;
                         $classBrace = $braces;
                         break;
-                    case ReducedTokens::T_FUNCTION;
+                    case ReducedTokens::T_FUNCTION:
                         $function      = $value;
                         $functionBrace = $braces;
                         $target        = strtolower($value);
@@ -71,7 +80,7 @@ class Parser
                             $this->addConflict($target, $namespace);
                         }
                         break;
-                    case ReducedTokens::T_FUNCTION_CALL;
+                    case ReducedTokens::T_FUNCTION_CALL:
                         $target = strtolower($value);
                         if (\in_array($target, $this->targets)) {
                             if ($useFunctionNative) {

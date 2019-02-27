@@ -31,50 +31,58 @@ class Parser
         $functionBrace     = -1;
         $useFunctionNative = false;
         foreach ($reducedTokens as list($type, $value)) {
-            if (ReducedTokens::T_BRACE_OPEN === $type) {
-                $braces++;
-            } elseif (ReducedTokens::T_BRACE_CLOSE === $type) {
-                $braces--;
-                if ($class && $classBrace === $braces) {
-                    $class = '';
-                }
-                if ($function && $functionBrace === $braces) {
-                    $function = '';
-                }
-            } elseif (ReducedTokens::T_NAMESPACE === $type) {
+            if (ReducedTokens::T_NAMESPACE === $type) {
                 $namespace         = $value;
                 $useFunctionNative = false;
             } elseif ($namespace) {
-                if (ReducedTokens::T_USE_FUNCTION === $type) {
-                    $target = strtolower($value[1]);
-                    if (\in_array($target, $this->targets)) {
-                        if (strtolower($value[0]) === $target) {
-                            $useFunctionNative = true;
-                        } else {
+                switch ($type) {
+                    case ReducedTokens::T_BRACE_OPEN;
+                        $braces++;
+                        break;
+                    case ReducedTokens::T_BRACE_CLOSE;
+                        $braces--;
+                        if ($class && $classBrace === $braces) {
+                            $class = '';
+                        }
+                        if ($function && $functionBrace === $braces) {
+                            $function = '';
+                        }
+                        break;
+                    case ReducedTokens::T_USE_FUNCTION;
+                        $target = strtolower($value[1]);
+                        if (\in_array($target, $this->targets)) {
+                            if (strtolower($value[0]) === $target) {
+                                $useFunctionNative = true;
+                            } else {
+                                $this->addConflict($target, $namespace);
+                            }
+                        }
+                        break;
+                    case ReducedTokens::T_CLASS;
+                    case ReducedTokens::T_TRAIT;
+                        $class      = $value;
+                        $classBrace = $braces;
+                        break;
+                    case ReducedTokens::T_FUNCTION;
+                        $function      = $value;
+                        $functionBrace = $braces;
+                        $target        = strtolower($value);
+                        if (!$class && \in_array($target, $this->targets)) {
                             $this->addConflict($target, $namespace);
                         }
-                    }
-                } elseif (ReducedTokens::T_CLASS === $type || ReducedTokens::T_TRAIT === $type) {
-                    $class      = $value;
-                    $classBrace = $braces;
-                } elseif (ReducedTokens::T_FUNCTION === $type) {
-                    $function      = $value;
-                    $functionBrace = $braces;
-                    $target        = strtolower($value);
-                    if (!$class && \in_array($target, $this->targets)) {
-                        $this->addConflict($target, $namespace);
-                    }
-                } elseif (ReducedTokens::T_FUNCTION_CALL === $type) {
-                    $target = strtolower($value);
-                    if (\in_array($target, $this->targets)) {
-                        if ($useFunctionNative) {
-                            $this->addUnfixable($target, $namespace);
-                        } else {
-                            $this->addFixable($target, $namespace);
+                        break;
+                    case ReducedTokens::T_FUNCTION_CALL;
+                        $target = strtolower($value);
+                        if (\in_array($target, $this->targets)) {
+                            if ($useFunctionNative) {
+                                $this->addUnfixable($target, $namespace);
+                            } else {
+                                $this->addFixable($target, $namespace);
+                            }
+                        } elseif (\in_array($target, $this->backslashTargets)) {
+                            $this->addUnfixable(ltrim($target, '\\'), $namespace);
                         }
-                    } elseif (\in_array($target, $this->backslashTargets)) {
-                        $this->addUnfixable(ltrim($target, '\\'), $namespace);
-                    }
+                        break;
                 }
             }
         }

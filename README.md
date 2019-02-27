@@ -53,9 +53,6 @@ The previous php 7.2 behaviour for non-countable argument was :
 
 In your `composer.json` :
 
-    "repositories": [
-        { "type": "git", "url": "https://github.com/arnapou/php72fixcount.git" }
-    ],
     "require": {
         "arnapou/php72fixcount": "^1.0"
     },

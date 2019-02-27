@@ -24,6 +24,7 @@ return PhpCsFixer\Config::create()
         'combine_consecutive_unsets'            => true,
         'concat_space'                          => ['spacing' => 'one'],
         'native_function_casing'                => true,
+        'no_alias_functions'                    => true,
         'no_blank_lines_after_class_opening'    => true,
         'no_blank_lines_after_phpdoc'           => true,
         'no_empty_comment'                      => true,
@@ -39,7 +40,7 @@ return PhpCsFixer\Config::create()
         'short_scalar_cast'                     => true,
         'single_quote'                          => true,
         'standardize_not_equals'                => true,
-        'ternary_to_null_coalescing'            => true,
+//        'ternary_to_null_coalescing'            => true, // php 7+
         'trailing_comma_in_multiline_array'     => true,
         'native_function_invocation'            => ['include' => ['@compiler_optimized']],
         'ordered_imports'                       => ['sort_algorithm' => 'alpha'],

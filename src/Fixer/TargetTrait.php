@@ -61,5 +61,4 @@ trait TargetTrait
         }
         return $this->unfixable[$target];
     }
-
 }

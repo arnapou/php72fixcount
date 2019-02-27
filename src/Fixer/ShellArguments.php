@@ -66,7 +66,7 @@ class ShellArguments
         if (empty($this->command)) {
             $this->usage();
         }
-        if (in_array($this->command, ['generate', 'search']) && empty($this->paths)) {
+        if (\in_array($this->command, ['generate', 'search']) && empty($this->paths)) {
             $this->usage();
         }
         if ($this->command === 'search') {

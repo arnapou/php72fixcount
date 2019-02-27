@@ -16,6 +16,14 @@ class Fixer
      * @var array
      */
     private $options;
+    /**
+     * @var int
+     */
+    private $nbFiles = 0;
+    /**
+     * @var float
+     */
+    private $execTime = 0;
 
     /**
      * Fixer constructor.
@@ -29,10 +37,10 @@ class Fixer
         $this->execute();
     }
 
-    /**
-     */
+    
     public function execute()
     {
+        $startTime = microtime(true);
         foreach ($this->paths as $path) {
             if (is_dir($path)) {
                 foreach (new Files($path, ['php']) as $file) {
@@ -42,6 +50,9 @@ class Fixer
                 $this->analyze($path, $this->options);
             }
         }
+        $this->execTime = microtime(true) - $startTime;
+
+        echo $this->nbFiles . ' file' . ($this->nbFiles == 1 ? '' : 's') . ' analyzed in ' . round($this->execTime, 2) . " sec\n";
 
         foreach ($this->targets as $target) {
             $this->unfixable[$target] = array_diff_key($this->unfixable[$target], $this->fixable[$target]);
@@ -60,15 +71,16 @@ class Fixer
         foreach ($this->targets as $target) {
             foreach ($parser->getConflicts($target) as $ns => $count) {
                 if (!$options['quiet']) {
-                    echo "$target | $filename | CONFLICT | $ns\n";
+                    echo str_pad($target, 6) . "  CONFLICT  $ns  $filename\n";
                 }
                 $this->conflicts[$target][$ns] = isset($this->conflicts[$target][$ns]) ? $this->conflicts[$target][$ns] + $count : $count;
             }
 
             foreach ($parser->getFixable($target) as $ns => $count) {
                 if (!$options['quiet']) {
-                    $s = $count == 1 ? ' ' : 's';
-                    echo "$target | $filename | " . str_pad($count, 2, ' ', STR_PAD_LEFT) . " call$s" . " | $ns\n";
+                    $s       = $count == 1 ? ' ' : 's';
+                    $nbCalls = str_pad($count, 3, ' ', STR_PAD_LEFT);
+                    echo str_pad($target, 6) . " $nbCalls call$s" . "  $ns  $filename\n";
                 }
                 $this->fixable[$target][$ns] = isset($this->fixable[$target][$ns]) ? $this->fixable[$target][$ns] + $count : $count;
             }
@@ -77,6 +89,8 @@ class Fixer
                 $this->unfixable[$target][$ns] = isset($this->unfixable[$target][$ns]) ? $this->unfixable[$target][$ns] + $count : $count;
             }
         }
+
+        $this->nbFiles++;
     }
 
     /**
@@ -98,7 +112,8 @@ class Fixer
         $phpUnfixed   = self::getPhpUnfixedNamespaces(array_keys($this->unfixable[$target])) ?: '// nothing to list';
         $phpConflicts = self::getPhpUnfixedNamespaces(array_keys($this->conflicts[$target])) ?: '// nothing to list';
 
-        file_put_contents($outputFile,
+        file_put_contents(
+            $outputFile,
             "<?php
 
 /*
@@ -122,7 +137,8 @@ $phpUnfixed
 $phpConflicts
 
 ",
-            LOCK_EX);
+            LOCK_EX
+        );
     }
 
     /**
@@ -157,5 +173,21 @@ $phpConflicts
             $php .= "// namespace $namespace\n";
         }
         return $php;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNbFiles()
+    {
+        return $this->nbFiles;
+    }
+
+    /**
+     * @return float
+     */
+    public function getExecTime()
+    {
+        return $this->execTime;
     }
 }

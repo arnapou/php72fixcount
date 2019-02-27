@@ -106,5 +106,4 @@ class Parser
     {
         $this->unfixable[$target][$namespace] = isset($this->unfixable[$target][$namespace]) ? $this->unfixable[$target][$namespace] + 1 : 1;
     }
-
 }

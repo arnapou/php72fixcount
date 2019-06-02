@@ -5,4 +5,4 @@ composer.lock
 generated.*.php
 vendor
 githubhook.log
-
+phpunit*.phar

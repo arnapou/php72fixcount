@@ -5,7 +5,8 @@ namespace Arnapou\PhpUnit;
 
 flushBuffers();
 dlPhpUnitPhar('phpunit.phar', phpUnitVersion());
-system(PHP_BINARY . ' ' . escapeshellarg('phpunit.phar'));
+system(PHP_BINARY . ' ' . escapeshellarg('phpunit.phar'), $return_code);
+exit($return_code);
 
 /**
  * cf. matrix https://phpunit.de/supported-versions.html

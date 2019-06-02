@@ -4,3 +4,5 @@
 composer.lock
 generated.*.php
 vendor
+githubhook.log
+

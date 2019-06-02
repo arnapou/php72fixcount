@@ -23,4 +23,4 @@ install:
   - composer install --no-interaction --prefer-source
 
 script:
-  - .travis.phpunit.php
+  - ./.travis.phpunit.php

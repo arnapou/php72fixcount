@@ -36,15 +36,21 @@ class ReducedTokens implements \IteratorAggregate
      * @var array
      */
     private $tokens;
+    /**
+     * @var bool
+     */
+    private $forwardToFirstNamespace;
 
     /**
      * Parser constructor.
      * @param array $tokens
+     * @param bool  $forwardToFirstNamespace
      */
-    public function __construct(array $tokens)
+    public function __construct(array $tokens, $forwardToFirstNamespace = true)
     {
         $this->tokens = $tokens;
         $this->count  = \count($this->tokens);
+        $this->forwardToFirstNamespace = $forwardToFirstNamespace;
     }
 
     /**
@@ -61,7 +67,10 @@ class ReducedTokens implements \IteratorAggregate
     private function reduce()
     {
         $this->index = 0;
-        $this->forwardToFirstNamespace(); // we ignore files without namespace (perf matters)
+        if ($this->forwardToFirstNamespace) {
+            // this is a performance optimization when we need to parse only namespaced files
+            $this->forwardToFirstNamespace();
+        }
         while ($this->index < $this->count) {
             $token = $this->tokens[$this->index];
 

@@ -8,7 +8,7 @@ stages:
   only:
     - master
   script:
-    - .gitlab-ci.php
+    - php .gitlab-ci.php
     - php composer.phar install --no-interaction --prefer-source
     - php phpunit.phar
   cache:

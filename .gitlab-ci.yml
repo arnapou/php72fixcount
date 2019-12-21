@@ -1,0 +1,41 @@
+
+stages:
+  - test
+
+
+.job-test: &job-test
+  stage: test
+  only:
+    - master
+  script:
+    - .gitlab-ci.php
+    - php composer.phar install --no-interaction --prefer-source
+    - php phpunit.phar
+  cache:
+    paths:
+      - vendor
+
+
+test:php-5.6:
+  <<: *job-test
+  image: 'php:5.6-jessie'
+
+test:php-7.0:
+  <<: *job-test
+  image: 'php:7.0-jessie'
+
+test:php-7.1:
+  <<: *job-test
+  image: 'php:7.1-stretch'
+
+test:php-7.2:
+  <<: *job-test
+  image: 'php:7.2-stretch'
+
+test:php-7.3:
+  <<: *job-test
+  image: 'php:7.3-buster'
+
+test:php-7.4:
+  <<: *job-test
+  image: 'php:7.4-buster'

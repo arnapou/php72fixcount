@@ -3,10 +3,16 @@
 
 namespace Arnapou\PhpUnit;
 
-flushBuffers();
-dlPhpUnitPhar('phpunit.phar', phpUnitVersion());
-system(PHP_BINARY . ' ' . escapeshellarg('phpunit.phar'), $return_code);
-exit($return_code);
+try {
+    flushBuffers();
+    dlPhpUnitPhar('phpunit.phar', phpUnitVersion());
+    dlUrl('composer-setup.php', 'https://getcomposer.org/installer');
+    system(PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/composer-setup.php'));
+} catch (\Exception $exception) {
+    exit(1);
+} catch (\Error $error) {
+    exit(1);
+}
 
 /**
  * cf. matrix https://phpunit.de/supported-versions.html
@@ -36,7 +42,11 @@ function phpUnitVersion()
 
 function dlPhpUnitPhar($filename, $version)
 {
-    $url = "https://phar.phpunit.de/phpunit-$version.phar";
+    dlUrl($filename, "https://phar.phpunit.de/phpunit-$version.phar");
+}
+
+function dlUrl($filename, $url)
+{
     file_put_contents($filename, file_get_contents($url));
 }
 

@@ -40,7 +40,7 @@ if (PHP_VERSION_ID < 70200) {
 switch ($arguments->getCommand()) {
     case 'clean':
         foreach (['count', 'sizeof'] as $target) {
-            file_put_contents(__DIR__ . "/generated.php72fix.$target.php", "<php \n", LOCK_EX);
+            file_put_contents(__DIR__ . "/generated.php72fix.$target.php", "<?php \n", LOCK_EX);
         }
         break;
     case 'generate':

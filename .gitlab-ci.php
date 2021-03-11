@@ -8,7 +8,9 @@ try {
     dlPhpUnitPhar('phpunit.phar', phpUnitVersion());
     dlUrl('composer-setup.php', 'https://getcomposer.org/installer');
     system(PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/composer-setup.php'));
-} catch (\Throwable $exception) {
+} catch (\Exception $exception) {
+    exit(1);
+} catch (\Error $exception) {
     exit(1);
 }
 
@@ -22,7 +24,7 @@ try {
  * PHPUnit 5    PHP 5.6, 7.0, 7.1         October 2, 2015     Support ended on February 2, 2018
  * PHPUnit 4    PHP 5.3, 5.4, 5.5, 5.6    March 7, 2014       Support ended on February 3, 2017
  */
-function phpUnitVersion(): int
+function phpUnitVersion()
 {
     if (PHP_VERSION_ID < 50600) {
         return 4;
@@ -42,17 +44,17 @@ function phpUnitVersion(): int
     return 9;
 }
 
-function dlPhpUnitPhar(string $filename, int $version): void
+function dlPhpUnitPhar($filename, $version)
 {
     dlUrl($filename, "https://phar.phpunit.de/phpunit-$version.phar");
 }
 
-function dlUrl(string $filename, string $url): void
+function dlUrl($filename, $url)
 {
     file_put_contents($filename, file_get_contents($url));
 }
 
-function flushBuffers(): void
+function flushBuffers()
 {
     $n = 10;
     while (ob_get_level() && $n--) {

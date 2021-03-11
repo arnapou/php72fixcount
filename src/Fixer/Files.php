@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Arnapou Php71FixCount package.
+ * This file is part of the Arnapou Php72FixCount package.
  *
  * (c) Arnaud Buathier <arnaud@arnapou.net>
  *
@@ -57,9 +57,9 @@ class Files implements \IteratorAggregate
                     !$file->isFile() ||
                     /* extension not allowed */
                     !\in_array(pathinfo($file->getPathname(), PATHINFO_EXTENSION), $this->extensions, true) ||
-                    /* ignore php71fixcount folder */
+                    /* ignore php72fixcount folder */
                     ($this->php72fixcountBasedir && 0 === strpos($file->getRealPath(), "$this->php72fixcountBasedir/")) ||
-                    /* ignore php71fixcount generated files (security if $php72fixcount_basedir is empty) */
+                    /* ignore php72fixcount generated files (security if $php72fixcount_basedir is empty) */
                     \in_array($file->getBasename(), ['generated.php72fix.count.php', 'generated.php72fix.sizeof.php'], true)
                 );
             }

@@ -1,7 +1,7 @@
 <?php
 
 $header = <<<HEADER
-This file is part of the Arnapou Php71FixCount package.
+This file is part of the Arnapou Php72FixCount package.
 
 (c) Arnaud Buathier <arnaud@arnapou.net>
 

@@ -6,7 +6,7 @@ namespace Arnapou\PhpUnit;
 try {
     flushBuffers();
     dlPhpUnitPhar('phpunit.phar', phpUnitVersion());
-    dlUrl('composer-setup.php', 'https://getcomposer.org/installer');
+    dlUrl('composer-setup.php', 'https://getcomposer.org/installer --' . (PHP_VERSION_ID < 70200 ? 1 : 2));
     system(PHP_BINARY . ' ' . escapeshellarg(__DIR__ . '/composer-setup.php'));
 } catch (\Exception $exception) {
     exit(1);

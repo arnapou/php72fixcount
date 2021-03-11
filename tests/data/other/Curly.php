@@ -4,8 +4,8 @@ namespace FixCount\Test\Curly;
 
 class Curly
 {
-    public static $ale = 'ipa';
-    public $type = 'ipa';
+    public static $ale  = 'ipa';
+    public        $type = 'ipa';
 
     public function T_CURLY_OPEN()
     {

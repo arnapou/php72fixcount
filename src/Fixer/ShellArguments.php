@@ -50,7 +50,7 @@ class ShellArguments
         $this->options = self::getDefaultOptions();
 
         foreach ($arguments as $argument) {
-            if (substr($argument, 0, 2) === '--') {
+            if (0 === strpos($argument, '--')) {
                 $option = $this->parseOption($argument);
                 if ($option && isset(self::getDefaultOptions()[$option[0]])) {
                     $this->options[$option[0]] = $option[1];
@@ -58,7 +58,7 @@ class ShellArguments
                     $this->usage('Unknown option ' . ($option ? $option[0] : $argument) . '.');
                 }
             } elseif (empty($this->command)) {
-                if (\in_array($argument, self::getPossibleCommands())) {
+                if (\in_array($argument, self::getPossibleCommands(), true)) {
                     $this->command = $argument;
                 } else {
                     $this->usage("Unknown command $argument.");
@@ -91,11 +91,13 @@ class ShellArguments
     {
         if (preg_match('!^--([^=]+)=(.*)$!', $option, $matches)) {
             return [$matches[1], trim(trim($matches[2], "'"), '"')];
-        } elseif (preg_match('!^--([^=]+)$!', $option, $matches)) {
-            return [$matches[1], true];
-        } else {
-            return null;
         }
+
+        if (preg_match('!^--([^=]+)$!', $option, $matches)) {
+            return [$matches[1], true];
+        }
+
+        return null;
     }
 
     /**
@@ -123,7 +125,7 @@ class ShellArguments
     }
 
     /**
-     * @return bool
+     * @return string
      */
     public function getCommand()
     {
@@ -148,6 +150,8 @@ class ShellArguments
 
     /**
      * @param string $error
+     *
+     * @return void
      */
     public function usage($error = '')
     {

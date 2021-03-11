@@ -28,7 +28,7 @@ class ReducedTokensTest extends TestCase
 
     public function testSkippedInterface()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\NoCountInInterface'],
                 [ReducedTokens::T_FUNCTION_CALL, 'end_of_file'],
@@ -39,7 +39,7 @@ class ReducedTokensTest extends TestCase
 
     public function testUseNativeCount()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\UseNativeCount'],
                 [ReducedTokens::T_USE_FUNCTION, ['count', 'count']],
@@ -57,7 +57,7 @@ class ReducedTokensTest extends TestCase
 
     public function testNoNamespace()
     {
-        $this->assertSame(
+        self::assertSame(
             [],
             $this->reduceTokens(__DIR__ . '/../data/unfixable/NoNamespace.php')
         );
@@ -65,7 +65,7 @@ class ReducedTokensTest extends TestCase
 
     public function testNoCount()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\NoCount'],
                 [ReducedTokens::T_CLASS, 'NoCount'],
@@ -84,7 +84,7 @@ class ReducedTokensTest extends TestCase
 
     public function testNormalTrait()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\NormalTrait'],
                 [ReducedTokens::T_TRAIT, 'NormalTrait'],
@@ -101,7 +101,7 @@ class ReducedTokensTest extends TestCase
 
     public function testMultipleNamespace()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\Namespace1'],
                 [ReducedTokens::T_BRACE_OPEN, '{'],
@@ -152,7 +152,7 @@ class ReducedTokensTest extends TestCase
 
     public function testUseFunction()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\UseFunctionAlias'],
                 [ReducedTokens::T_USE_FUNCTION, ['Another\HackedCount', 'count']],
@@ -179,9 +179,27 @@ class ReducedTokensTest extends TestCase
         );
     }
 
+    public function testNamespaceRelative()
+    {
+        self::assertSame(
+            [
+                [ReducedTokens::T_NAMESPACE, 'FixCount\\Test\\Relative'],
+                [ReducedTokens::T_BRACE_OPEN, '{'],
+                [ReducedTokens::T_CLASS, 'ThisIsARareCase'],
+                [ReducedTokens::T_BRACE_OPEN, '{'],
+                [ReducedTokens::T_BRACE_CLOSE, '}'],
+                [ReducedTokens::T_BRACE_CLOSE, '}'],
+                [ReducedTokens::T_NAMESPACE, 'FixCount\\Test'],
+                [ReducedTokens::T_BRACE_OPEN, '{'],
+                [ReducedTokens::T_BRACE_CLOSE, '}'],
+            ],
+            $this->reduceTokens(__DIR__ . '/../data/other/NamespaceRelative.php')
+        );
+    }
+
     public function testCurly()
     {
-        $this->assertSame(
+        self::assertSame(
             [
                 [ReducedTokens::T_NAMESPACE, 'FixCount\Test\Curly'],
                 [ReducedTokens::T_CLASS, 'Curly'],

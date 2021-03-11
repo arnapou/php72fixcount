@@ -46,7 +46,9 @@ class Fixer
         $this->execute();
     }
 
-    
+    /**
+     * @return void
+     */
     public function execute()
     {
         $startTime = microtime(true);
@@ -61,7 +63,7 @@ class Fixer
         }
         $this->execTime = microtime(true) - $startTime;
 
-        echo $this->nbFiles . ' file' . ($this->nbFiles == 1 ? '' : 's') . ' analyzed in ' . round($this->execTime, 2) . " sec\n";
+        echo $this->nbFiles . ' file' . ($this->nbFiles === 1 ? '' : 's') . ' analyzed in ' . round($this->execTime, 2) . " sec\n";
 
         foreach ($this->targets as $target) {
             $this->unfixable[$target] = array_diff_key($this->unfixable[$target], $this->fixable[$target]);
@@ -72,6 +74,8 @@ class Fixer
     /**
      * @param string $filename
      * @param array  $options
+     *
+     * @return void
      */
     protected function analyze($filename, array $options)
     {
@@ -87,8 +91,8 @@ class Fixer
 
             foreach ($parser->getFixable($target) as $ns => $count) {
                 if (!$options['quiet']) {
-                    $s       = $count == 1 ? ' ' : 's';
-                    $nbCalls = str_pad($count, 3, ' ', STR_PAD_LEFT);
+                    $s       = $count === 1 ? ' ' : 's';
+                    $nbCalls = str_pad((string)$count, 3, ' ', STR_PAD_LEFT);
                     echo str_pad($target, 6) . " $nbCalls call$s" . "  $ns  $filename\n";
                 }
                 $this->fixable[$target][$ns] = isset($this->fixable[$target][$ns]) ? $this->fixable[$target][$ns] + $count : $count;
@@ -105,10 +109,12 @@ class Fixer
     /**
      * @param string $target
      * @param string $outputFile
+     *
+     * @return void
      */
     public function writeTo($target, $outputFile)
     {
-        if (!\in_array($target, $this->targets)) {
+        if (!\in_array($target, $this->targets, true)) {
             throw new \InvalidArgumentException('Target argument is invalid, correct values : ' . implode(', ', $this->targets));
         }
 
@@ -117,9 +123,9 @@ class Fixer
         ksort($this->conflicts[$target]);
 
         $date         = date('l d F Y H:i:s');
-        $phpFixed     = self::getPhpFixedNamespaces(array_keys($this->fixable[$target]), $target) ?: '// nothing is fixable';
-        $phpUnfixed   = self::getPhpUnfixedNamespaces(array_keys($this->unfixable[$target])) ?: '// nothing to list';
-        $phpConflicts = self::getPhpUnfixedNamespaces(array_keys($this->conflicts[$target])) ?: '// nothing to list';
+        $phpFixed     = $this->getPhpFixedNamespaces(array_keys($this->fixable[$target]), $target) ?: '// nothing is fixable';
+        $phpUnfixed   = $this->getPhpUnfixedNamespaces(array_keys($this->unfixable[$target])) ?: '// nothing to list';
+        $phpConflicts = $this->getPhpUnfixedNamespaces(array_keys($this->conflicts[$target])) ?: '// nothing to list';
 
         file_put_contents(
             $outputFile,
@@ -131,15 +137,15 @@ class Fixer
 
 $phpFixed
 
-/* 
+/*
  * Bellow are not fixed because \\$target is called
  * or 'use function count' is used at the beginning
  */
 
 $phpUnfixed
 
-/* 
- * Bellow are not fixed because there is a conflict 
+/*
+ * Bellow are not fixed because there is a conflict
  * with an existing namespaced $target function
  */
 

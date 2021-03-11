@@ -15,14 +15,14 @@ use Traversable;
 
 class ReducedTokens implements \IteratorAggregate
 {
-    const T_BRACE_OPEN = 'brace open';
-    const T_BRACE_CLOSE = 'brace close';
-    const T_CLASS = 'class';
-    const T_TRAIT = 'trait';
-    const T_FUNCTION = 'function';
+    const T_BRACE_OPEN    = 'brace open';
+    const T_BRACE_CLOSE   = 'brace close';
+    const T_CLASS         = 'class';
+    const T_TRAIT         = 'trait';
+    const T_FUNCTION      = 'function';
     const T_FUNCTION_CALL = 'function call';
-    const T_NAMESPACE = 'namespace';
-    const T_USE_FUNCTION = 'use function';
+    const T_NAMESPACE     = 'namespace';
+    const T_USE_FUNCTION  = 'use function';
 
     /**
      * @var int
@@ -48,9 +48,21 @@ class ReducedTokens implements \IteratorAggregate
      */
     public function __construct(array $tokens, $forwardToFirstNamespace = true)
     {
-        $this->tokens = $tokens;
-        $this->count  = \count($this->tokens);
+        $this->tokens                  = $tokens;
+        $this->count                   = \count($this->tokens);
         $this->forwardToFirstNamespace = $forwardToFirstNamespace;
+
+        if (PHP_VERSION_ID < 80000) {
+            if (!\defined('T_NAME_QUALIFIED')) {
+                \define('T_NAME_QUALIFIED', 1e12 + 1);
+            }
+            if (!\defined('T_NAME_FULLY_QUALIFIED')) {
+                \define('T_NAME_FULLY_QUALIFIED', 1e12 + 2);
+            }
+            if (!\defined('T_NAME_RELATIVE')) {
+                \define('T_NAME_RELATIVE', 1e12 + 3);
+            }
+        }
     }
 
     /**
@@ -71,6 +83,7 @@ class ReducedTokens implements \IteratorAggregate
             // this is a performance optimization when we need to parse only namespaced files
             $this->forwardToFirstNamespace();
         }
+        $previous = null;
         while ($this->index < $this->count) {
             $token = $this->tokens[$this->index];
 
@@ -89,9 +102,14 @@ class ReducedTokens implements \IteratorAggregate
                         break;
                     case T_NAMESPACE:
                         $this->index++;
-                        $string = $this->fetchNextString();
-                        yield [self::T_NAMESPACE, $string];
-                        $this->index--;
+                        if ($this->index < $this->count && \is_array($this->tokens[$this->index]) && T_NS_SEPARATOR === $this->tokens[$this->index][0]) {
+                            // skip class use like "namespace\XX\YY"
+                            $this->fetchNextString();
+                        } else {
+                            $string = $this->fetchNextString();
+                            yield [self::T_NAMESPACE, $string];
+                            $this->index--;
+                        }
                         break;
                     case T_USE:
                         if ($useFunction = $this->fetchUseFunction()) {
@@ -111,10 +129,12 @@ class ReducedTokens implements \IteratorAggregate
                         break;
                     case T_CLASS:
                         $this->index++;
-                        $string = $this->fetchNextString();
-                        yield [self::T_CLASS, $string];
-                        $this->forwardToNextOpenBrace();
-                        $this->index--;
+                        if ($previous !== T_DOUBLE_COLON) {
+                            $string = $this->fetchNextString();
+                            yield [self::T_CLASS, $string];
+                            $this->forwardToNextOpenBrace();
+                            $this->index--;
+                        }
                         break;
                     case T_TRAIT:
                         $this->index++;
@@ -128,11 +148,14 @@ class ReducedTokens implements \IteratorAggregate
                         break;
                     case T_STRING:
                     case T_NS_SEPARATOR:
+                    case T_NAME_RELATIVE:
+                    case T_NAME_FULLY_QUALIFIED:
                         if ($functionCall = $this->fetchFunctionCall()) {
                             yield [self::T_FUNCTION_CALL, $functionCall];
                         }
                         break;
                 }
+                $previous = \is_array($this->tokens[$this->index]) ? $this->tokens[$this->index][0] : null;
             }
 
             $this->index++;
@@ -154,6 +177,9 @@ class ReducedTokens implements \IteratorAggregate
                 case T_STRING:
                 case T_NS_SEPARATOR:
                 case T_DOUBLE_COLON:
+                case T_NAME_FULLY_QUALIFIED:
+                case T_NAME_QUALIFIED:
+                case T_NAME_RELATIVE:
                     $string .= $token[1];
                     $this->index++;
                     break;
@@ -164,9 +190,12 @@ class ReducedTokens implements \IteratorAggregate
                     break 2;
             }
         }
-        return $string;
+        return rtrim($string, ':');
     }
 
+    /**
+     * @return void
+     */
     private function skipWhitespaces()
     {
         while ($this->index < $this->count) {
@@ -180,6 +209,8 @@ class ReducedTokens implements \IteratorAggregate
 
     /**
      * skip all tokens and stop on first namespace
+     *
+     * @return void
      */
     private function forwardToFirstNamespace()
     {
@@ -194,6 +225,8 @@ class ReducedTokens implements \IteratorAggregate
 
     /**
      * skip all tokens and stop on first opened brace found
+     *
+     * @return void
      */
     private function forwardToNextOpenBrace()
     {
@@ -208,6 +241,8 @@ class ReducedTokens implements \IteratorAggregate
 
     /**
      * Completely skip the next brace block
+     *
+     * @return void
      */
     private function skipNextBraceBlock()
     {
@@ -249,10 +284,10 @@ class ReducedTokens implements \IteratorAggregate
                         // use function <function> as <alias>
                         $this->index++;
                         return [ltrim($string, '\\'), $this->fetchNextString()];
-                    } else {
-                        // use function <function>    => we calculate the alias
-                        return [ltrim($string, '\\'), ltrim(substr($string, strrpos($string, '\\') ?: 0), '\\')];
                     }
+
+                    // use function <function>    => we calculate the alias
+                    return [ltrim($string, '\\'), ltrim(substr($string, strrpos($string, '\\') ?: 0), '\\')];
                 }
             }
         }

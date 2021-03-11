@@ -14,6 +14,7 @@ namespace Arnapou\Php72FixCount\Fixer;
 class Parser
 {
     use TargetTrait;
+
     /**
      * @var string
      */
@@ -29,6 +30,9 @@ class Parser
         $this->parse();
     }
 
+    /**
+     * @return void
+     */
     private function parse()
     {
         $reducedTokens     = new ReducedTokens(token_get_all(file_get_contents($this->filename)));
@@ -59,7 +63,7 @@ class Parser
                         break;
                     case ReducedTokens::T_USE_FUNCTION:
                         $target = strtolower($value[1]);
-                        if (\in_array($target, $this->targets)) {
+                        if (\in_array($target, $this->targets, true)) {
                             if (strtolower($value[0]) === $target) {
                                 $useFunctionNative = true;
                             } else {
@@ -76,20 +80,23 @@ class Parser
                         $function      = $value;
                         $functionBrace = $braces;
                         $target        = strtolower($value);
-                        if (!$class && \in_array($target, $this->targets)) {
+                        if (!$class && \in_array($target, $this->targets, true)) {
                             $this->addConflict($target, $namespace);
                         }
                         break;
                     case ReducedTokens::T_FUNCTION_CALL:
                         $target = strtolower($value);
-                        if (\in_array($target, $this->targets)) {
+                        if (\in_array($target, $this->targets, true)) {
                             if ($useFunctionNative) {
                                 $this->addUnfixable($target, $namespace);
                             } else {
                                 $this->addFixable($target, $namespace);
                             }
-                        } elseif (\in_array($target, $this->backslashTargets)) {
-                            $this->addUnfixable(ltrim($target, '\\'), $namespace);
+                        } elseif ('\\' === $target[0]) {
+                            $target = substr($target, 1);
+                            if (\in_array($target, $this->targets, true)) {
+                                $this->addUnfixable($target, $namespace);
+                            }
                         }
                         break;
                 }
@@ -98,8 +105,10 @@ class Parser
     }
 
     /**
-     * @param string $target
+     * @param 'count'|'sizeof' $target
      * @param string $namespace
+     *
+     * @return void
      */
     private function addConflict($target, $namespace)
     {
@@ -107,8 +116,10 @@ class Parser
     }
 
     /**
-     * @param string $target
+     * @param 'count'|'sizeof' $target
      * @param string $namespace
+     *
+     * @return void
      */
     private function addFixable($target, $namespace)
     {
@@ -116,8 +127,10 @@ class Parser
     }
 
     /**
-     * @param string $target
+     * @param 'count'|'sizeof' $target
      * @param string $namespace
+     *
+     * @return void
      */
     private function addUnfixable($target, $namespace)
     {

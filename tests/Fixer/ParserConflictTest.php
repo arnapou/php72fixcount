@@ -20,26 +20,26 @@ class ParserConflictTest extends TestCase
     {
         $parser = new Parser(__DIR__ . '/../data/conflicts/UseFunction.php');
 
-        $this->assertSame(['FixCount\\Test\\UseFunction' => 1], $parser->getConflicts('count'), 'conflict');
-        $this->assertSame(['FixCount\\Test\\UseFunction' => 2], $parser->getFixable('count'), 'fixable');
-        $this->assertSame(['FixCount\\Test\\UseFunction' => 3], $parser->getUnfixable('count'), 'unfixable');
+        self::assertSame(['FixCount\\Test\\UseFunction' => 1], $parser->getConflicts('count'), 'conflict');
+        self::assertSame(['FixCount\\Test\\UseFunction' => 2], $parser->getFixable('count'), 'fixable');
+        self::assertSame(['FixCount\\Test\\UseFunction' => 3], $parser->getUnfixable('count'), 'unfixable');
     }
 
     public function testUseFunctionAlias()
     {
         $parser = new Parser(__DIR__ . '/../data/conflicts/UseFunctionAlias.php');
 
-        $this->assertSame(['FixCount\\Test\\UseFunctionAlias' => 1], $parser->getConflicts('count'), 'conflict');
-        $this->assertSame(['FixCount\\Test\\UseFunctionAlias' => 2], $parser->getFixable('count'), 'fixable');
-        $this->assertSame(['FixCount\\Test\\UseFunctionAlias' => 3], $parser->getUnfixable('count'), 'unfixable');
+        self::assertSame(['FixCount\\Test\\UseFunctionAlias' => 1], $parser->getConflicts('count'), 'conflict');
+        self::assertSame(['FixCount\\Test\\UseFunctionAlias' => 2], $parser->getFixable('count'), 'fixable');
+        self::assertSame(['FixCount\\Test\\UseFunctionAlias' => 3], $parser->getUnfixable('count'), 'unfixable');
     }
 
     public function testCountRedefinedInNS()
     {
         $parser = new Parser(__DIR__ . '/../data/conflicts/CountRedefinedInNS.php');
 
-        $this->assertSame(['FixCount\\Test\\CountRedefinedInNS' => 1], $parser->getConflicts('count'), 'conflict');
-        $this->assertSame(['FixCount\\Test\\CountRedefinedInNS' => 2], $parser->getFixable('count'), 'fixable');
-        $this->assertSame(['FixCount\\Test\\CountRedefinedInNS' => 3], $parser->getUnfixable('count'), 'unfixable');
+        self::assertSame(['FixCount\\Test\\CountRedefinedInNS' => 1], $parser->getConflicts('count'), 'conflict');
+        self::assertSame(['FixCount\\Test\\CountRedefinedInNS' => 2], $parser->getFixable('count'), 'fixable');
+        self::assertSame(['FixCount\\Test\\CountRedefinedInNS' => 3], $parser->getUnfixable('count'), 'unfixable');
     }
 }

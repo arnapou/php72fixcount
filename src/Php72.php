@@ -13,6 +13,13 @@ namespace Arnapou\Php72FixCount;
 
 final class Php72
 {
+    /**
+     * This is the count wrapper of the native count
+     *
+     * @param array|string|int|bool|float|object|null $item
+     * @param int                                     $mode
+     * @return int
+     */
     public static function count($item, $mode = COUNT_NORMAL)
     {
         if (\is_array($item) || $item instanceof \Countable) {

@@ -14,29 +14,25 @@ namespace Arnapou\Php72FixCount\Fixer;
 trait TargetTrait
 {
     /**
-     * @var array
+     * @var array{count: array<string, int>, sizeof: array<string, int>}
      */
     private $fixable = ['count' => [], 'sizeof' => []];
     /**
-     * @var array
+     * @var array{count: array<string, int>, sizeof: array<string, int>}
      */
     private $unfixable = ['count' => [], 'sizeof' => []];
     /**
-     * @var array
+     * @var array{count: array<string, int>, sizeof: array<string, int>}
      */
     private $conflicts = ['count' => [], 'sizeof' => []];
     /**
-     * @var array
+     * @var array{'count', 'sizeof'}
      */
     private $targets = ['count', 'sizeof'];
-    /*
-     * @var array
-     */
-    private $backslashTargets = ['\\count', '\\sizeof'];
 
     /**
-     * @param string $target
-     * @return array
+     * @param 'count'|'sizeof' $target
+     * @return array<string, int>
      */
     public function getConflicts($target)
     {
@@ -47,8 +43,8 @@ trait TargetTrait
     }
 
     /**
-     * @param string $target
-     * @return array
+     * @param 'count'|'sizeof' $target
+     * @return array<string, int>
      */
     public function getFixable($target)
     {
@@ -59,8 +55,8 @@ trait TargetTrait
     }
 
     /**
-     * @param string $target
-     * @return array
+     * @param 'count'|'sizeof' $target
+     * @return array<string, int>
      */
     public function getUnfixable($target)
     {

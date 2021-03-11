@@ -6,6 +6,7 @@ stages:
 .job-test: &job-test
   stage: test
   only:
+    - 1.x
     - master
   before_script:
     - php .gitlab-ci.php

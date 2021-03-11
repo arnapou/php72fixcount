@@ -11,7 +11,7 @@ stages:
   before_script:
     - php .gitlab-ci.php
   script:
-    - php composer.phar install --no-interaction --optimize-autoloader
+    - php composer.phar install --no-interaction --optimize-autoloader --no-dev
     - php phpunit.phar
   cache:
     key: "$CI_COMMIT_REF_SLUG:$CI_JOB_NAME"

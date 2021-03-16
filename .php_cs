@@ -34,6 +34,7 @@ return PhpCsFixer\Config::create()
     ->setRules(
         [
             '@PSR2'                                 => true,
+            '@DoctrineAnnotation'                   => true,
             'array_syntax'                          => ['syntax' => 'short'],
             'blank_line_after_opening_tag'          => true,
             'combine_consecutive_issets'            => true,
@@ -56,7 +57,6 @@ return PhpCsFixer\Config::create()
             'short_scalar_cast'                     => true,
             'single_quote'                          => true,
             'standardize_not_equals'                => true,
-            //        'ternary_to_null_coalescing'            => true, // php 7+
             'trailing_comma_in_multiline_array'     => true,
             'native_function_invocation'            => ['include' => ['@compiler_optimized']],
             'ordered_imports'                       => ['sort_algorithm' => 'alpha'],

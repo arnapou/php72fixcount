@@ -129,3 +129,8 @@ int(1)
 int(1)
 int(2)
 ```
+
+### PHP support
+
+* **v2.x** : `php >= 5.6` AND `php <= 8.0`
+* **v1.x** : `php >= 5.6` AND `php <= 7.4`

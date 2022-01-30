@@ -63,7 +63,7 @@ class ShellArguments
                 } else {
                     $this->usage("Unknown command $argument.");
                 }
-            } elseif ($this->command) {
+            } else {
                 if (!is_dir($argument)) {
                     $this->usage("Path $argument not found.");
                 } else {

@@ -4,3 +4,6 @@ default: composer
 
 composer:
 	composer install --no-interaction --no-progress --optimize-autoloader --quiet
+
+update:
+	composer install --no-interaction --no-progress --optimize-autoloader

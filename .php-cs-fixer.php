@@ -9,7 +9,7 @@ For the full copyright and license information, please view the LICENSE
 file that was distributed with this source code.
 HEADER;
 
-$finder = PhpCsFixer\Finder::create()
+$finder = (new PhpCsFixer\Finder())
     ->exclude(
         [
             'data',
@@ -57,7 +57,7 @@ return (new PhpCsFixer\Config())
             'short_scalar_cast'                     => true,
             'single_quote'                          => true,
             'standardize_not_equals'                => true,
-            'trailing_comma_in_multiline_array'     => true,
+            'trailing_comma_in_multiline'           => true,
             'native_function_invocation'            => ['include' => ['@compiler_optimized']],
             'ordered_imports'                       => ['sort_algorithm' => 'alpha'],
             'single_import_per_statement'           => true,
